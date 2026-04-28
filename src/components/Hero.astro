@@ -1,0 +1,329 @@
+---
+---
+<section class="hero" id="home">
+  <div class="hero-bg">
+    <img 
+      src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=1800&q=85" 
+      alt="Modern Los Angeles home remodeling"
+      class="hero-img"
+    />
+    <div class="hero-overlay"></div>
+    <!-- Diagonal cut -->
+    <div class="hero-cut"></div>
+  </div>
+
+  <div class="container hero-content">
+    <div class="hero-text">
+      <p class="section-label hero-eyebrow" 
+         data-es="Remodelación Profesional en Los Ángeles" 
+         data-en="Professional Remodeling in Los Angeles">
+        Remodelación Profesional en Los Ángeles
+      </p>
+
+      <h1 class="hero-title">
+        <span class="hero-title-line" data-es="Transformamos Tu" data-en="We Transform Your">Transformamos Tu</span><br/>
+        <span class="hero-title-line hero-title-accent" data-es="Hogar en el Espacio" data-en="Home Into the Space">Hogar en el Espacio</span><br/>
+        <span class="hero-title-line" data-es="que Mereces" data-en="You Deserve">que Mereces</span>
+      </h1>
+
+      <p class="hero-sub"
+         data-es="Más de 12 años de experiencia en remodelaciones residenciales y comerciales en el área de Los Ángeles. Trabajo garantizado, presupuesto honesto."
+         data-en="Over 12 years of experience in residential and commercial remodeling in the Greater Los Angeles area. Guaranteed work, honest pricing.">
+        Más de 12 años de experiencia en remodelaciones residenciales y comerciales en el área de Los Ángeles. Trabajo garantizado, presupuesto honesto.
+      </p>
+
+      <div class="hero-ctas">
+        <button class="btn-primary hero-chat-btn pulse-btn" id="hero-chat-btn" onclick="openChat()"
+                data-es="💬 Cotizar Ahora" data-en="💬 Get a Quote">
+          💬 Cotizar Ahora
+        </button>
+
+        <a href="https://wa.me/13239707517" target="_blank" class="btn-ghost btn-wa" id="hero-whatsapp-btn"
+           data-es="WhatsApp" data-en="WhatsApp">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+          </svg>
+          WhatsApp
+        </a>
+
+        <a href="tel:+13239707517" class="btn-ghost" id="hero-call-btn"
+           data-es="Llamar" data-en="Call Us">
+          📞 <span data-es="Llamar" data-en="Call Us">Llamar</span>
+        </a>
+      </div>
+
+      <!-- Stats -->
+      <div class="hero-stats">
+        <div class="stat-item">
+          <span class="stat-num">12+</span>
+          <span class="stat-lbl" data-es="Años de Experiencia" data-en="Years Experience">Años de Experiencia</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-num">500+</span>
+          <span class="stat-lbl" data-es="Proyectos Completados" data-en="Projects Completed">Proyectos Completados</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-num orange">4.9★</span>
+          <span class="stat-lbl" data-es="Calificación Promedio" data-en="Average Rating">Calificación Promedio</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating badge -->
+    <div class="hero-badge">
+      <div class="badge-inner">
+        <span class="badge-icon">🏆</span>
+        <span class="badge-text" data-es="Contratista Licenciado CA" data-en="CA Licensed Contractor">Contratista<br/>Licenciado CA</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scroll indicator -->
+  <div class="scroll-indicator">
+    <span class="scroll-line"></span>
+    <span class="scroll-txt" data-es="Explorar" data-en="Explore">Explorar</span>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    padding-top: 72px;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 30%;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      rgba(10,10,10,0.95) 0%,
+      rgba(10,10,10,0.80) 50%,
+      rgba(10,10,10,0.30) 100%
+    );
+  }
+
+  .hero-cut {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 120px;
+    background: var(--bg);
+    clip-path: polygon(0 60%, 100% 0, 100% 100%, 0 100%);
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 40px;
+    padding-top: 60px;
+    padding-bottom: 100px;
+    width: 100%;
+  }
+
+  .hero-text {
+    max-width: 660px;
+  }
+
+  .hero-eyebrow {
+    margin-bottom: 20px;
+    animation: fadeUp 0.6s ease 0.1s both;
+  }
+
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 8vw, 7.5rem);
+    line-height: 0.95;
+    letter-spacing: 0.01em;
+    margin-bottom: 24px;
+    animation: fadeUp 0.6s ease 0.2s both;
+  }
+
+  .hero-title-accent {
+    color: var(--orange);
+    -webkit-text-stroke: 0px;
+  }
+
+  .hero-sub {
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--text-dim);
+    max-width: 520px;
+    margin-bottom: 36px;
+    animation: fadeUp 0.6s ease 0.3s both;
+  }
+
+  .hero-ctas {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 48px;
+    animation: fadeUp 0.6s ease 0.4s both;
+  }
+
+  .pulse-btn {
+    animation: pulse 2.5s infinite;
+  }
+
+  .btn-wa {
+    border-color: var(--whatsapp);
+    color: var(--whatsapp);
+  }
+
+  .btn-wa:hover {
+    background: rgba(37, 211, 102, 0.1);
+    border-color: var(--whatsapp);
+    color: var(--whatsapp);
+    transform: translateY(-2px);
+  }
+
+  .hero-stats {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    animation: fadeUp 0.6s ease 0.5s both;
+  }
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .stat-num {
+    font-family: var(--font-display);
+    font-size: 2.2rem;
+    line-height: 1;
+    color: var(--text);
+    letter-spacing: 0.02em;
+  }
+
+  .stat-num.orange {
+    color: var(--orange);
+  }
+
+  .stat-lbl {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .stat-divider {
+    width: 1px;
+    height: 40px;
+    background: var(--border2);
+    flex-shrink: 0;
+  }
+
+  .hero-badge {
+    flex-shrink: 0;
+    animation: float 4s ease-in-out infinite, fadeUp 0.6s ease 0.6s both;
+  }
+
+  .badge-inner {
+    background: rgba(20,20,20,0.9);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+
+  .badge-icon {
+    font-size: 2rem;
+  }
+
+  .badge-text {
+    font-size: 12px;
+    font-family: var(--font-mono);
+    color: var(--text-dim);
+    text-align: center;
+    line-height: 1.4;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .scroll-indicator {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    z-index: 2;
+    animation: fadeIn 1s ease 1s both;
+  }
+
+  .scroll-line {
+    display: block;
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, transparent, var(--border2));
+  }
+
+  .scroll-txt {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    writing-mode: vertical-rl;
+  }
+
+  @media (max-width: 900px) {
+    .hero-badge {
+      display: none;
+    }
+    .hero-content {
+      padding-bottom: 80px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .hero-ctas {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .hero-ctas .btn-ghost, .hero-ctas .btn-primary {
+      width: 100%;
+      justify-content: center;
+    }
+    .hero-stats {
+      gap: 16px;
+    }
+    .scroll-indicator {
+      display: none;
+    }
+  }
+</style>

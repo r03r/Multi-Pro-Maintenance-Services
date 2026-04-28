@@ -1,0 +1,290 @@
+---
+import { CITIES } from '../data/content.js';
+---
+
+<!-- Service Area -->
+<section class="area-section" id="area">
+  <div class="container">
+    <div class="section-header">
+      <p class="section-label" data-es="Dónde trabajamos" data-en="Where we work">Dónde trabajamos</p>
+      <h2 class="section-title" data-es="Áreas de Servicio" data-en="Service Areas">Áreas de Servicio</h2>
+      <p class="area-sub" 
+         data-es="Atendemos todo el Condado de Los Ángeles y alrededores"
+         data-en="We serve all of Los Angeles County and surrounding areas">
+        Atendemos todo el Condado de Los Ángeles y alrededores
+      </p>
+    </div>
+
+    <div class="cities-cloud">
+      {CITIES.map(city => (
+        <span class="city-chip">{city}</span>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- Contact -->
+<section class="contact-section" id="contact">
+  <div class="container">
+    <div class="contact-inner">
+      <!-- Left CTA -->
+      <div class="contact-cta">
+        <p class="section-label" data-es="Hablemos" data-en="Let's talk">Hablemos</p>
+        <h2 class="section-title" data-es="Contáctanos" data-en="Contact Us">Contáctanos</h2>
+        <p class="contact-sub"
+           data-es="Obtén tu cotización gratuita hoy. Respondemos en menos de 2 horas durante horario de atención."
+           data-en="Get your free quote today. We respond in under 2 hours during business hours.">
+          Obtén tu cotización gratuita hoy. Respondemos en menos de 2 horas durante horario de atención.
+        </p>
+        <button class="btn-primary cta-big" onclick="openChat()"
+                data-es="💬 Cotización Gratuita" data-en="💬 Free Quote">
+          💬 Cotización Gratuita
+        </button>
+      </div>
+
+      <!-- Right info -->
+      <div class="contact-info">
+        <a href="tel:+13239707517" class="contact-item contact-phone">
+          <div class="contact-icon-wrap contact-blue">
+            <span class="contact-icon">📞</span>
+          </div>
+          <div class="contact-details">
+            <span class="contact-label" data-es="Teléfono / WhatsApp" data-en="Phone / WhatsApp">Teléfono / WhatsApp</span>
+            <span class="contact-value">(323) 970-7517</span>
+          </div>
+          <span class="contact-arrow">→</span>
+        </a>
+
+        <a href="https://wa.me/13239707517" target="_blank" class="contact-item contact-wa">
+          <div class="contact-icon-wrap contact-green">
+            <span class="contact-icon">💬</span>
+          </div>
+          <div class="contact-details">
+            <span class="contact-label">WhatsApp</span>
+            <span class="contact-value">+1 (323) 970-7517</span>
+          </div>
+          <span class="contact-arrow">→</span>
+        </a>
+
+        <a href="mailto:info@multipromaintenance.com" class="contact-item">
+          <div class="contact-icon-wrap contact-orange">
+            <span class="contact-icon">✉️</span>
+          </div>
+          <div class="contact-details">
+            <span class="contact-label" data-es="Correo Electrónico" data-en="Email">Correo Electrónico</span>
+            <span class="contact-value">info@multipromaintenance.com</span>
+          </div>
+          <span class="contact-arrow">→</span>
+        </a>
+
+        <div class="contact-item no-link">
+          <div class="contact-icon-wrap">
+            <span class="contact-icon">🕐</span>
+          </div>
+          <div class="contact-details">
+            <span class="contact-label" data-es="Horario de Atención" data-en="Business Hours">Horario de Atención</span>
+            <span class="contact-value" data-es="Lun–Sáb: 7am–7pm" data-en="Mon–Sat: 7am–7pm">Lun–Sáb: 7am–7pm</span>
+          </div>
+        </div>
+
+        <div class="contact-item no-link">
+          <div class="contact-icon-wrap">
+            <span class="contact-icon">📍</span>
+          </div>
+          <div class="contact-details">
+            <span class="contact-label" data-es="Área de Servicio" data-en="Service Area">Área de Servicio</span>
+            <span class="contact-value">Greater Los Angeles, CA</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Area */
+  .area-section {
+    padding: 80px 0;
+    background: var(--bg2);
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .section-header .section-label {
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+  .section-header .section-label::before {
+    display: none;
+  }
+
+  .area-sub {
+    font-size: 16px;
+    color: var(--text-dim);
+    margin-top: 10px;
+  }
+
+  .cities-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .city-chip {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 8px 18px;
+    font-size: 13px;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    transition: all 0.2s;
+    cursor: default;
+    letter-spacing: 0.03em;
+  }
+
+  .city-chip:hover {
+    border-color: var(--orange);
+    color: var(--orange);
+    background: var(--orange-glow);
+  }
+
+  /* Contact */
+  .contact-section {
+    padding: 100px 0;
+  }
+
+  .contact-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+
+  .contact-cta .section-label {
+    margin-bottom: 12px;
+  }
+
+  .contact-cta .section-title {
+    margin-bottom: 16px;
+  }
+
+  .contact-sub {
+    font-size: 16px;
+    color: var(--text-dim);
+    line-height: 1.7;
+    margin-bottom: 32px;
+  }
+
+  .cta-big {
+    font-size: 16px;
+    padding: 16px 36px;
+  }
+
+  .contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .contact-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 20px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: all 0.2s;
+    text-decoration: none;
+    color: var(--text);
+  }
+
+  .contact-item:not(.no-link):hover {
+    border-color: var(--border2);
+    transform: translateX(4px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  }
+
+  .contact-item.contact-wa:hover {
+    border-color: var(--whatsapp);
+  }
+
+  .contact-item.contact-phone:hover {
+    border-color: var(--blue);
+  }
+
+  .contact-icon-wrap {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    background: var(--bg3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 18px;
+  }
+
+  .contact-blue {
+    background: rgba(0,85,255,0.1);
+  }
+
+  .contact-green {
+    background: rgba(37,211,102,0.1);
+  }
+
+  .contact-orange {
+    background: var(--orange-glow);
+  }
+
+  .contact-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+  }
+
+  .contact-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .contact-value {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .contact-arrow {
+    color: var(--text-muted);
+    font-size: 16px;
+    transition: transform 0.2s;
+  }
+
+  .contact-item:hover .contact-arrow {
+    transform: translateX(4px);
+    color: var(--orange);
+  }
+
+  @media (max-width: 900px) {
+    .contact-inner {
+      grid-template-columns: 1fr;
+      gap: 48px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .area-section,
+    .contact-section {
+      padding: 60px 0;
+    }
+  }
+</style>

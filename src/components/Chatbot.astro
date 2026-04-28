@@ -1,0 +1,681 @@
+---
+import { SERVICES } from '../data/content.js';
+
+const budgets_es = ["Menos de $5,000", "$5,000 – $15,000", "$15,000 – $50,000", "$50,000+", "No lo sé aún"];
+const budgets_en = ["Under $5,000", "$5,000 – $15,000", "$15,000 – $50,000", "$50,000+", "Not sure yet"];
+const times_es = ["Lo antes posible", "1–2 semanas", "Este mes", "Sin prisa"];
+const times_en = ["As soon as possible", "1–2 weeks", "This month", "No rush"];
+---
+
+<div class="chat-overlay" id="chat-overlay" onclick="chatOverlayClick(event)">
+  <div class="chat-modal" id="chat-modal">
+    <!-- Header -->
+    <div class="chat-header">
+      <div class="chat-header-left">
+        <div class="chat-avatar">
+          <img src="https://customer-assets.emergentagent.com/job_a118d919-7742-467e-8ca4-e3cd2b505786/artifacts/pcrks7pz_WhatsApp%20Image%202026-04-17%20at%2008.03.21.jpeg"
+               alt="Multi-Pro" width="36" height="36" />
+        </div>
+        <div>
+          <span class="chat-name">Multi-Pro</span>
+          <span class="chat-status">● <span data-es="En línea" data-en="Online">En línea</span></span>
+        </div>
+      </div>
+      <button class="chat-close" onclick="closeChat()" aria-label="Cerrar">✕</button>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="chat-progress">
+      <div class="chat-progress-bar" id="chat-progress-bar"></div>
+    </div>
+
+    <!-- Messages -->
+    <div class="chat-messages" id="chat-messages">
+      <!-- Filled by JS -->
+    </div>
+
+    <!-- Input area -->
+    <div class="chat-footer" id="chat-footer">
+      <!-- Text input (name, phone, address) -->
+      <div class="chat-input-row" id="chat-text-input" style="display:none">
+        <input type="text" id="chat-text-field" class="chat-input" placeholder="" autocomplete="off" />
+        <button class="chat-send-btn" id="chat-send-btn" onclick="chatSendText()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Service chips -->
+      <div class="chat-chips-wrap" id="chat-service-chips" style="display:none">
+        {SERVICES.map(s => (
+          <button class="chat-chip" data-key={s.key} data-es={s.es} data-en={s.en}
+                  onclick={`chatPickService('${s.key}')`}>
+            <span class="chip-icon">{s.icon}</span>
+            <span class="chip-label" data-es={s.es} data-en={s.en}>{s.es}</span>
+          </button>
+        ))}
+      </div>
+
+      <!-- Budget chips -->
+      <div class="chat-chips-wrap" id="chat-budget-chips" style="display:none">
+        {budgets_es.map((b, i) => (
+          <button class="chat-chip" data-es={b} data-en={budgets_en[i]}
+                  onclick={`chatPickBudget(this)`}>
+            <span class="chip-label" data-es={b} data-en={budgets_en[i]}>{b}</span>
+          </button>
+        ))}
+      </div>
+
+      <!-- Timeline chips -->
+      <div class="chat-chips-wrap" id="chat-timeline-chips" style="display:none">
+        {times_es.map((t, i) => (
+          <button class="chat-chip" data-es={t} data-en={times_en[i]}
+                  onclick={`chatPickTimeline(this)`}>
+            <span class="chip-label" data-es={t} data-en={times_en[i]}>{t}</span>
+          </button>
+        ))}
+      </div>
+
+      <!-- Done buttons -->
+      <div class="chat-done-btns" id="chat-done-btns" style="display:none">
+        <a href="#" id="chat-wa-btn" target="_blank" class="btn-primary chat-wa-btn">
+          📱 <span data-es="Enviar por WhatsApp" data-en="Send via WhatsApp">Enviar por WhatsApp</span>
+        </a>
+        <button class="btn-ghost" onclick="chatRestart()" 
+                data-es="Nueva Consulta" data-en="New Query">Nueva Consulta</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---- State ----
+  let chatLang = 'es';
+  let chatStep = 'idle'; // idle | name | phone | service | address | budget | timeline | done
+  let chatData = {};
+
+  const STEPS = ['name', 'phone', 'service', 'address', 'budget', 'timeline', 'done'];
+  const PROGRESS = { name: 10, phone: 25, service: 40, address: 55, budget: 70, timeline: 85, done: 100 };
+
+  const T = {
+    greeting: { es: '¡Hola! 👋 Soy el asistente de Multi-Pro. Voy a ayudarte a obtener una cotización rápida y gratuita.', en: 'Hi there! 👋 I\'m the Multi-Pro assistant. I\'ll help you get a quick, free quote.' },
+    q_name: { es: '¿Cuál es tu nombre?', en: 'What\'s your name?' },
+    q_phone: { es: '¡Perfecto, {name}! ¿Cuál es tu número de teléfono?', en: 'Perfect, {name}! What\'s your phone number?' },
+    q_service: { es: 'Gracias. ¿Qué tipo de trabajo necesitas?', en: 'Thanks. What type of work do you need?' },
+    q_address: { es: 'Genial, {service}. ¿Cuál es la dirección del proyecto?', en: 'Great, {service}. What\'s the project address?' },
+    q_budget: { es: '¿Cuál es tu presupuesto aproximado?', en: 'What\'s your approximate budget?' },
+    q_timeline: { es: '¿Cuándo te gustaría comenzar?', en: 'When would you like to start?' },
+    done: { es: '¡Excelente! 🎉 Hemos recibido tu solicitud. Te contactaremos pronto vía WhatsApp. También puedes enviarnos tu solicitud directamente:', en: 'Excellent! 🎉 We\'ve received your request. We\'ll contact you soon via WhatsApp. You can also send us your request directly:' },
+    ph_name: { es: 'Tu nombre...', en: 'Your name...' },
+    ph_phone: { es: 'Tu teléfono...', en: 'Your phone number...' },
+    ph_address: { es: 'Dirección del proyecto...', en: 'Project address...' },
+  };
+
+  function tt(key, vars = {}) {
+    let str = T[key]?.[chatLang] || T[key]?.es || key;
+    for (const [k, v] of Object.entries(vars)) str = str.replaceAll(`{${k}}`, v);
+    return str;
+  }
+
+  // ---- DOM helpers ----
+  const $msgs = () => document.getElementById('chat-messages');
+  const $bar = () => document.getElementById('chat-progress-bar');
+
+  function addBubble(text, type = 'bot', delay = 0) {
+    const msgs = $msgs();
+    if (!msgs) return;
+    const bubble = document.createElement('div');
+    bubble.className = `bubble bubble-${type}`;
+    if (delay > 0) {
+      bubble.style.animationDelay = `${delay}s`;
+      bubble.style.opacity = '0';
+    }
+    bubble.innerHTML = `<div class="bubble-inner">${text}</div>`;
+    msgs.appendChild(bubble);
+    setTimeout(() => {
+      bubble.style.opacity = '1';
+      msgs.scrollTop = msgs.scrollHeight;
+    }, delay * 1000);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function addTyping() {
+    const msgs = $msgs();
+    if (!msgs) return;
+    const typing = document.createElement('div');
+    typing.className = 'bubble bubble-bot typing-indicator';
+    typing.id = 'typing-bubble';
+    typing.innerHTML = '<div class="bubble-inner"><span></span><span></span><span></span></div>';
+    msgs.appendChild(typing);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function removeTyping() {
+    document.getElementById('typing-bubble')?.remove();
+  }
+
+  function setProgress(step) {
+    const p = PROGRESS[step] || 0;
+    const bar = $bar();
+    if (bar) bar.style.width = `${p}%`;
+  }
+
+  function showInput(type) {
+    document.getElementById('chat-text-input').style.display = 'none';
+    document.getElementById('chat-service-chips').style.display = 'none';
+    document.getElementById('chat-budget-chips').style.display = 'none';
+    document.getElementById('chat-timeline-chips').style.display = 'none';
+    document.getElementById('chat-done-btns').style.display = 'none';
+
+    if (type === 'text') {
+      document.getElementById('chat-text-input').style.display = 'flex';
+    } else if (type === 'service') {
+      document.getElementById('chat-service-chips').style.display = 'flex';
+    } else if (type === 'budget') {
+      document.getElementById('chat-budget-chips').style.display = 'flex';
+    } else if (type === 'timeline') {
+      document.getElementById('chat-timeline-chips').style.display = 'flex';
+    } else if (type === 'done') {
+      document.getElementById('chat-done-btns').style.display = 'flex';
+    }
+  }
+
+  function botSay(text, delay = 400) {
+    addTyping();
+    setTimeout(() => {
+      removeTyping();
+      addBubble(text, 'bot');
+    }, delay);
+  }
+
+  // ---- Flow ----
+  function startChat() {
+    chatData = {};
+    const msgs = $msgs();
+    if (msgs) msgs.innerHTML = '';
+    setProgress('name');
+    chatLang = window.__currentLang || 'es';
+
+    addBubble(tt('greeting'), 'bot');
+    setTimeout(() => {
+      botSay(tt('q_name'), 500);
+      const field = document.getElementById('chat-text-field');
+      if (field) field.placeholder = tt('ph_name');
+      showInput('text');
+      chatStep = 'name';
+    }, 500);
+  }
+
+  window.chatSendText = function() {
+    const field = document.getElementById('chat-text-field');
+    if (!field) return;
+    const val = field.value.trim();
+    if (!val) return;
+    field.value = '';
+    addBubble(val, 'user');
+
+    if (chatStep === 'name') {
+      chatData.name = val;
+      setProgress('phone');
+      botSay(tt('q_phone', { name: val }));
+      field.placeholder = tt('ph_phone');
+      chatStep = 'phone';
+    } else if (chatStep === 'phone') {
+      chatData.phone = val;
+      setProgress('service');
+      botSay(tt('q_service'));
+      setTimeout(() => showInput('service'), 600);
+      chatStep = 'service';
+    } else if (chatStep === 'address') {
+      chatData.address = val;
+      setProgress('budget');
+      botSay(tt('q_budget'));
+      setTimeout(() => showInput('budget'), 600);
+      chatStep = 'budget';
+    }
+  };
+
+  window.chatPickService = function(key) {
+    const btn = document.querySelector(`[data-key="${key}"]`);
+    const label = btn?.querySelector('.chip-label');
+    const display = label ? (chatLang === 'en' ? (label.dataset.en || label.textContent) : label.textContent) : key;
+    chatData.service = display;
+    chatData.serviceKey = key;
+    addBubble(display, 'user');
+    setProgress('address');
+    botSay(tt('q_address', { service: display }));
+    const field = document.getElementById('chat-text-field');
+    if (field) field.placeholder = tt('ph_address');
+    setTimeout(() => showInput('text'), 600);
+    chatStep = 'address';
+  };
+
+  window.chatPickBudget = function(btn) {
+    const label = btn.querySelector('.chip-label');
+    const display = chatLang === 'en' ? (label?.dataset.en || label?.textContent) : label?.textContent;
+    chatData.budget = display;
+    addBubble(display, 'user');
+    setProgress('timeline');
+    botSay(tt('q_timeline'));
+    setTimeout(() => showInput('timeline'), 600);
+    chatStep = 'timeline';
+  };
+
+  window.chatPickTimeline = function(btn) {
+    const label = btn.querySelector('.chip-label');
+    const display = chatLang === 'en' ? (label?.dataset.en || label?.textContent) : label?.textContent;
+    chatData.timeline = display;
+    addBubble(display, 'user');
+    setProgress('done');
+    chatStep = 'done';
+
+    // Submit lead to backend (fire and forget)
+    const backendUrl = window.__backendUrl || 'https://chatbot-reformas-la.preview.emergentagent.com';
+    fetch(`${backendUrl}/api/leads`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: chatData.name,
+        phone: chatData.phone,
+        service: chatData.service,
+        address: chatData.address,
+        budget: chatData.budget,
+        timeline: chatData.timeline,
+        language: chatLang,
+      }),
+    }).catch(() => {});
+
+    // Build WhatsApp message
+    const waText = buildWAText();
+    const waBtn = document.getElementById('chat-wa-btn');
+    if (waBtn) {
+      waBtn.href = `https://wa.me/13239707517?text=${encodeURIComponent(waText)}`;
+    }
+
+    botSay(tt('done'));
+    setTimeout(() => showInput('done'), 700);
+  };
+
+  function buildWAText() {
+    const greeting = chatLang === 'en'
+      ? '🏠 *New Quote Request - Multi-Pro*'
+      : '🏠 *Nueva Solicitud de Cotización - Multi-Pro*';
+    const labels = chatLang === 'en'
+      ? { name: 'Name', phone: 'Phone', service: 'Service', address: 'Address', budget: 'Budget', time: 'Timeline' }
+      : { name: 'Nombre', phone: 'Teléfono', service: 'Servicio', address: 'Dirección', budget: 'Presupuesto', time: 'Tiempo' };
+    return [
+      greeting,
+      '',
+      `*${labels.name}:* ${chatData.name || '-'}`,
+      `*${labels.phone}:* ${chatData.phone || '-'}`,
+      `*${labels.service}:* ${chatData.service || '-'}`,
+      `*${labels.address}:* ${chatData.address || '-'}`,
+      `*${labels.budget}:* ${chatData.budget || '-'}`,
+      `*${labels.time}:* ${chatData.timeline || '-'}`,
+    ].join('\n');
+  }
+
+  window.chatRestart = function() {
+    startChat();
+  };
+
+  // ---- Open / Close ----
+  window.openChat = function() {
+    const overlay = document.getElementById('chat-overlay');
+    if (!overlay) return;
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    if (chatStep === 'idle') {
+      setTimeout(startChat, 200);
+    }
+  };
+
+  window.closeChat = function() {
+    const overlay = document.getElementById('chat-overlay');
+    if (!overlay) return;
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  };
+
+  window.chatOverlayClick = function(e) {
+    if (e.target === document.getElementById('chat-overlay')) closeChat();
+  };
+
+  // Enter key in text input
+  document.addEventListener('DOMContentLoaded', () => {
+    const field = document.getElementById('chat-text-field');
+    if (field) {
+      field.addEventListener('keydown', e => {
+        if (e.key === 'Enter') chatSendText();
+      });
+    }
+  });
+
+  // Update chip labels on lang change (called from main i18n script)
+  window.__updateChatLang = function(lang) {
+    chatLang = lang;
+    // Update all chip labels
+    document.querySelectorAll('.chip-label[data-es][data-en]').forEach(el => {
+      el.textContent = lang === 'en' ? el.dataset.en : el.dataset.es;
+    });
+    // Update placeholder
+    const field = document.getElementById('chat-text-field');
+    if (field && chatStep === 'name') field.placeholder = tt('ph_name');
+    else if (field && chatStep === 'phone') field.placeholder = tt('ph_phone');
+    else if (field && chatStep === 'address') field.placeholder = tt('ph_address');
+  };
+</script>
+
+<style>
+  .chat-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    padding: 24px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    backdrop-filter: blur(4px);
+  }
+
+  .chat-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .chat-modal {
+    width: 100%;
+    max-width: 420px;
+    height: 640px;
+    max-height: 85vh;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+  }
+
+  .chat-overlay.open .chat-modal {
+    transform: translateY(0);
+  }
+
+  /* Header */
+  .chat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg3);
+    flex-shrink: 0;
+  }
+
+  .chat-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .chat-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid var(--orange);
+    flex-shrink: 0;
+  }
+
+  .chat-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .chat-name {
+    display: block;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1.2;
+  }
+
+  .chat-status {
+    display: block;
+    font-size: 11px;
+    color: var(--whatsapp);
+    font-family: var(--font-mono);
+    letter-spacing: 0.03em;
+  }
+
+  .chat-close {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--border);
+    color: var(--text-dim);
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .chat-close:hover {
+    background: var(--border2);
+    color: var(--text);
+  }
+
+  /* Progress */
+  .chat-progress {
+    height: 3px;
+    background: var(--border);
+    flex-shrink: 0;
+  }
+
+  .chat-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--orange), var(--orange-light));
+    width: 0%;
+    transition: width 0.5s ease;
+    border-radius: 0 2px 2px 0;
+  }
+
+  /* Messages */
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    scroll-behavior: smooth;
+  }
+
+  .chat-messages::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .bubble {
+    display: flex;
+    max-width: 80%;
+    animation: fadeUp 0.3s ease forwards;
+  }
+
+  .bubble-bot {
+    align-self: flex-start;
+  }
+
+  .bubble-user {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+  }
+
+  .bubble-inner {
+    padding: 10px 14px;
+    border-radius: 16px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .bubble-bot .bubble-inner {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-bottom-left-radius: 4px;
+  }
+
+  .bubble-user .bubble-inner {
+    background: var(--orange);
+    color: white;
+    border-bottom-right-radius: 4px;
+  }
+
+  /* Typing indicator */
+  .typing-indicator .bubble-inner {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 12px 16px;
+  }
+
+  .typing-indicator span {
+    display: block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    animation: typing-dot 1.4s ease-in-out infinite;
+  }
+  .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes typing-dot {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+    30% { transform: translateY(-4px); opacity: 1; }
+  }
+
+  /* Footer / Input */
+  .chat-footer {
+    border-top: 1px solid var(--border);
+    padding: 12px 16px;
+    background: var(--bg3);
+    flex-shrink: 0;
+  }
+
+  .chat-input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .chat-input {
+    flex: 1;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .chat-input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .chat-input:focus {
+    border-color: var(--orange);
+  }
+
+  .chat-send-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--orange);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+
+  .chat-send-btn:hover {
+    background: var(--orange-light);
+    transform: scale(1.05);
+  }
+
+  .chat-chips-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    max-height: 160px;
+    overflow-y: auto;
+  }
+
+  .chat-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 100px;
+    padding: 8px 14px;
+    font-size: 13px;
+    color: var(--text-dim);
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .chat-chip:hover {
+    border-color: var(--orange);
+    color: var(--orange);
+    background: var(--orange-glow);
+  }
+
+  .chip-icon {
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  .chat-done-btns {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .chat-wa-btn {
+    width: 100%;
+    justify-content: center;
+    background: var(--whatsapp);
+    font-size: 14px;
+  }
+
+  .chat-wa-btn:hover {
+    background: #1fb954;
+    box-shadow: 0 6px 20px rgba(37,211,102,0.35);
+  }
+
+  @media (max-width: 480px) {
+    .chat-overlay {
+      padding: 0;
+      align-items: flex-end;
+    }
+    .chat-modal {
+      max-width: 100%;
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+      height: 75vh;
+    }
+  }
+</style>

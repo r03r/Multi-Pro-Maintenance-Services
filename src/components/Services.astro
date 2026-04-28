@@ -1,0 +1,208 @@
+---
+import { SERVICES } from '../data/content.js';
+---
+<section class="services-section" id="services">
+  <div class="container">
+    <div class="section-header">
+      <p class="section-label" data-es="Lo que hacemos" data-en="What we do">Lo que hacemos</p>
+      <h2 class="section-title" data-es="Nuestros Servicios" data-en="Our Services">Nuestros Servicios</h2>
+      <p class="section-sub" 
+         data-es="Soluciones completas de remodelación para cada rincón de tu hogar"
+         data-en="Complete remodeling solutions for every corner of your home">
+        Soluciones completas de remodelación para cada rincón de tu hogar
+      </p>
+    </div>
+
+    <div class="services-grid">
+      {SERVICES.map((service, i) => (
+        <div class="service-card" data-key={service.key} style={`animation-delay: ${i * 0.07}s`}>
+          <div class="card-img-wrap">
+            <img src={service.image} alt={service.es} class="card-img" loading="lazy" />
+            <div class="card-img-overlay"></div>
+            <div class="card-icon-badge">
+              <span class="card-icon">{service.icon}</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <h3 class="card-title" data-es={service.es} data-en={service.en}>{service.es}</h3>
+            <p class="card-desc" data-es={service.desc_es} data-en={service.desc_en}>{service.desc_es}</p>
+            <button class="card-cta" onclick="openChat()" data-es="Cotizar →" data-en="Quote →">
+              Cotizar →
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .services-section {
+    padding: 100px 0;
+    position: relative;
+  }
+
+  .services-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255,90,0,0.04) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 64px;
+  }
+
+  .section-header .section-label {
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+
+  .section-header .section-label::before {
+    display: none;
+  }
+
+  .section-sub {
+    color: var(--text-dim);
+    font-size: 17px;
+    margin-top: 12px;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+
+  .service-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    opacity: 0;
+    animation: fadeUp 0.5s ease forwards;
+  }
+
+  .service-card:hover {
+    border-color: var(--orange);
+    transform: translateY(-6px);
+    box-shadow: 0 20px 50px rgba(255,90,0,0.15);
+  }
+
+  .card-img-wrap {
+    position: relative;
+    height: 180px;
+    overflow: hidden;
+  }
+
+  .card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+
+  .service-card:hover .card-img {
+    transform: scale(1.08);
+  }
+
+  .card-img-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(10,10,10,0.7));
+  }
+
+  .card-icon-badge {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    width: 40px;
+    height: 40px;
+    background: rgba(10,10,10,0.9);
+    border: 1.5px solid var(--orange);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+  }
+
+  .card-icon {
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  .card-body {
+    padding: 20px;
+  }
+
+  .card-title {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    letter-spacing: 0.02em;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .card-desc {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.6;
+    margin-bottom: 16px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-cta {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--orange);
+    letter-spacing: 0.03em;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .card-cta:hover {
+    gap: 8px;
+    color: var(--orange-light);
+  }
+
+  @media (max-width: 1100px) {
+    .services-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .services-section {
+      padding: 70px 0;
+    }
+    .services-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+    .card-img-wrap {
+      height: 150px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .services-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

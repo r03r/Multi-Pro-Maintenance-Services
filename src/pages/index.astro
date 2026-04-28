@@ -1,11 +1,122 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import Header from '../components/Header.astro';
+import Hero from '../components/Hero.astro';
+import Services from '../components/Services.astro';
+import WhyUs from '../components/WhyUs.astro';
+import Testimonials from '../components/Testimonials.astro';
+import AreaContact from '../components/AreaContact.astro';
+import Footer from '../components/Footer.astro';
+import FloatingActions from '../components/FloatingActions.astro';
+import Chatbot from '../components/Chatbot.astro';
 ---
 
 <Layout>
-	<Welcome />
+  <Header />
+  <main>
+    <Hero />
+    <Services />
+    <WhyUs />
+    <Testimonials />
+    <AreaContact />
+  </main>
+  <Footer />
+  <FloatingActions />
+  <Chatbot />
 </Layout>
+
+<!-- Global i18n + interactions script -->
+<script>
+  // ---- Language system ----
+  let currentLang = 'es';
+  window.__currentLang = 'es';
+  window.__backendUrl = 'https://chatbot-reformas-la.preview.emergentagent.com';
+
+  function applyLang(lang) {
+    currentLang = lang;
+    window.__currentLang = lang;
+
+    // Update all [data-es] [data-en] elements
+    document.querySelectorAll('[data-es][data-en]').forEach(el => {
+      const txt = lang === 'en' ? el.dataset.en : el.dataset.es;
+      if (txt !== undefined) {
+        // Don't change elements that are handled differently (chat chips, etc.)
+        if (!el.classList.contains('chip-label')) {
+          el.textContent = txt;
+        }
+      }
+    });
+
+    // Update lang buttons
+    document.getElementById('lang-es')?.classList.toggle('active', lang === 'es');
+    document.getElementById('lang-en')?.classList.toggle('active', lang === 'en');
+
+    // Update html lang
+    document.documentElement.lang = lang;
+
+    // Update chat chips
+    if (window.__updateChatLang) window.__updateChatLang(lang);
+
+    // Persist
+    localStorage.setItem('mp_lang', lang);
+  }
+
+  // Lang button handlers
+  document.getElementById('lang-es')?.addEventListener('click', () => applyLang('es'));
+  document.getElementById('lang-en')?.addEventListener('click', () => applyLang('en'));
+
+  // Restore lang from storage
+  const savedLang = localStorage.getItem('mp_lang');
+  if (savedLang === 'en') applyLang('en');
+
+  // ---- Header scroll effect ----
+  const header = document.getElementById('header');
+  let lastY = 0;
+  window.addEventListener('scroll', () => {
+    const y = window.scrollY;
+    if (y > 100) {
+      header?.classList.add('scrolled');
+    } else {
+      header?.classList.remove('scrolled');
+    }
+    lastY = y;
+  }, { passive: true });
+
+  // ---- Mobile hamburger ----
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobile-menu');
+  hamburger?.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    mobileMenu?.classList.toggle('open');
+  });
+
+  // Close mobile menu on link click
+  document.querySelectorAll('.mobile-link').forEach(link => {
+    link.addEventListener('click', () => {
+      hamburger?.classList.remove('open');
+      mobileMenu?.classList.remove('open');
+    });
+  });
+
+  // ---- Intersection Observer for animations ----
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.animationPlayState = 'running';
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.service-card, .why-card, .testimonial-card').forEach(el => {
+    el.style.animationPlayState = 'paused';
+    observer.observe(el);
+  });
+</script>
+
+<style is:global>
+  .header.scrolled {
+    background: rgba(10,10,10,0.98) !important;
+    border-bottom-color: var(--border2) !important;
+  }
+</style>

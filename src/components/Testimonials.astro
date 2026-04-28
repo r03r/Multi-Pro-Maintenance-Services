@@ -1,0 +1,246 @@
+---
+import { TESTIMONIALS } from '../data/content.js';
+---
+
+<section class="testimonials-section" id="testimonials">
+  <div class="container">
+    <div class="section-header">
+      <p class="section-label" data-es="Clientes felices" data-en="Happy clients">Clientes felices</p>
+      <h2 class="section-title" data-es="Lo Que Dicen Nuestros Clientes" data-en="What Our Clients Say">
+        Lo Que Dicen<br/>Nuestros Clientes
+      </h2>
+    </div>
+
+    <div class="testimonials-grid">
+      {TESTIMONIALS.map((t, i) => (
+        <div class="testimonial-card" style={`animation-delay: ${i * 0.12}s`}>
+          <div class="stars">
+            {"★".repeat(t.stars)}
+          </div>
+          <blockquote class="testimonial-quote" data-es={t.es} data-en={t.en}>
+            "{t.es}"
+          </blockquote>
+          <div class="testimonial-author">
+            <div class="author-avatar">
+              <span class="author-initial">{t.name.charAt(0)}</span>
+            </div>
+            <div class="author-info">
+              <span class="author-name">{t.name}</span>
+              <span class="author-location">📍 {t.location}</span>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <!-- Trust bar -->
+    <div class="trust-bar">
+      <div class="trust-item">
+        <span class="trust-icon">✅</span>
+        <span class="trust-txt" data-es="Verificado en Google" data-en="Google Verified">Verificado en Google</span>
+      </div>
+      <div class="trust-sep"></div>
+      <div class="trust-item">
+        <span class="trust-icon">⭐</span>
+        <span class="trust-txt" data-es="4.9 / 5 Estrellas" data-en="4.9 / 5 Stars">4.9 / 5 Estrellas</span>
+      </div>
+      <div class="trust-sep"></div>
+      <div class="trust-item">
+        <span class="trust-icon">💬</span>
+        <span class="trust-txt" data-es="100+ Reseñas" data-en="100+ Reviews">100+ Reseñas</span>
+      </div>
+      <div class="trust-sep"></div>
+      <div class="trust-item">
+        <span class="trust-icon">🏆</span>
+        <span class="trust-txt" data-es="Best of Houzz" data-en="Best of Houzz">Best of Houzz</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .testimonials-section {
+    padding: 100px 0;
+    position: relative;
+  }
+
+  .testimonials-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 50% at 50% 100%, rgba(255,90,0,0.03) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 64px;
+  }
+
+  .section-header .section-label {
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+  .section-header .section-label::before {
+    display: none;
+  }
+
+  .testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-bottom: 60px;
+  }
+
+  .testimonial-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    transition: all 0.3s ease;
+    opacity: 0;
+    animation: fadeUp 0.5s ease forwards;
+    position: relative;
+  }
+
+  .testimonial-card::before {
+    content: '"';
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    font-family: Georgia, serif;
+    font-size: 5rem;
+    color: var(--orange);
+    opacity: 0.1;
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .testimonial-card:hover {
+    border-color: var(--border2);
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+  }
+
+  .stars {
+    color: #FFB800;
+    font-size: 16px;
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+  }
+
+  .testimonial-quote {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text-dim);
+    margin-bottom: 24px;
+    font-style: normal;
+  }
+
+  .testimonial-author {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .author-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--orange), #FF3000);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .author-initial {
+    font-family: var(--font-display);
+    font-size: 18px;
+    color: white;
+    letter-spacing: 0.05em;
+  }
+
+  .author-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .author-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text);
+  }
+
+  .author-location {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
+
+  .trust-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    padding: 28px 40px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    flex-wrap: wrap;
+  }
+
+  .trust-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .trust-icon {
+    font-size: 16px;
+  }
+
+  .trust-txt {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-dim);
+    white-space: nowrap;
+    font-family: var(--font-mono);
+    letter-spacing: 0.03em;
+  }
+
+  .trust-sep {
+    width: 1px;
+    height: 24px;
+    background: var(--border2);
+  }
+
+  @media (max-width: 900px) {
+    .testimonials-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    .testimonials-grid .testimonial-card:last-child {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .testimonials-section {
+      padding: 70px 0;
+    }
+    .testimonials-grid {
+      grid-template-columns: 1fr;
+    }
+    .testimonials-grid .testimonial-card:last-child {
+      grid-column: auto;
+    }
+    .trust-sep {
+      display: none;
+    }
+    .trust-bar {
+      gap: 16px;
+      padding: 20px;
+    }
+  }
+</style>

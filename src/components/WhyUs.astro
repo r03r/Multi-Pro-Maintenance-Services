@@ -1,0 +1,203 @@
+---
+const reasons = [
+  {
+    icon: "⭐",
+    es_title: "Experiencia Comprobada",
+    en_title: "Proven Experience",
+    es_desc: "Más de 12 años transformando hogares en el área de LA con resultados que hablan por sí solos.",
+    en_desc: "Over 12 years transforming homes in the LA area with results that speak for themselves.",
+    accent: "#FF5A00",
+  },
+  {
+    icon: "💰",
+    es_title: "Presupuesto Transparente",
+    en_title: "Transparent Pricing",
+    es_desc: "Sin sorpresas. Cotización detallada antes de comenzar, precio fijo por el trabajo acordado.",
+    en_desc: "No surprises. Detailed quote before we start, fixed price for the agreed work.",
+    accent: "#0055FF",
+  },
+  {
+    icon: "🛡️",
+    es_title: "Trabajo Garantizado",
+    en_title: "Guaranteed Work",
+    es_desc: "Todos nuestros proyectos incluyen garantía de mano de obra. Tu satisfacción es nuestra prioridad.",
+    en_desc: "All our projects include a labor warranty. Your satisfaction is our priority.",
+    accent: "#25D366",
+  },
+  {
+    icon: "📜",
+    es_title: "Equipo Certificado",
+    en_title: "Certified Team",
+    es_desc: "Contratistas licenciados y asegurados en California. Cumplimos todos los códigos de construcción locales.",
+    en_desc: "Licensed and insured contractors in California. We comply with all local building codes.",
+    accent: "#FF5A00",
+  },
+];
+---
+
+<section class="why-section" id="why">
+  <div class="container">
+    <div class="why-inner">
+      <!-- Left: text -->
+      <div class="why-left">
+        <p class="section-label" data-es="Nuestra propuesta" data-en="Our proposition">Nuestra propuesta</p>
+        <h2 class="section-title" data-es="¿Por Qué Elegirnos?" data-en="Why Choose Us?">
+          ¿Por Qué<br/>Elegirnos?
+        </h2>
+        <p class="why-sub"
+           data-es="No somos el contratista más barato — somos el más confiable. Cada proyecto tiene nuestro nombre, y eso lo tomamos en serio."
+           data-en="We're not the cheapest contractor — we're the most reliable. Every project carries our name, and we take that seriously.">
+          No somos el contratista más barato — somos el más confiable. Cada proyecto tiene nuestro nombre, y eso lo tomamos en serio.
+        </p>
+        <button class="btn-primary" onclick="openChat()" 
+                data-es="Hablar con Nosotros" data-en="Talk to Us">
+          Hablar con Nosotros →
+        </button>
+      </div>
+
+      <!-- Right: cards -->
+      <div class="why-right">
+        {reasons.map((r, i) => (
+          <div class="why-card" style={`animation-delay: ${i * 0.1}s`}>
+            <div class="why-card-icon" style={`background: ${r.accent}18; border-color: ${r.accent}30`}>
+              <span class="why-icon">{r.icon}</span>
+            </div>
+            <div class="why-card-body">
+              <h3 class="why-card-title" data-es={r.es_title} data-en={r.en_title}>{r.es_title}</h3>
+              <p class="why-card-desc" data-es={r.es_desc} data-en={r.en_desc}>{r.es_desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <!-- Decorative number -->
+  <div class="bg-number" aria-hidden="true">12+</div>
+</section>
+
+<style>
+  .why-section {
+    padding: 100px 0;
+    background: var(--bg2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .why-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+
+  .why-left {
+    position: relative;
+    z-index: 1;
+  }
+
+  .why-left .section-label {
+    margin-bottom: 12px;
+  }
+
+  .why-left .section-title {
+    margin-bottom: 20px;
+  }
+
+  .why-sub {
+    color: var(--text-dim);
+    font-size: 16px;
+    line-height: 1.7;
+    margin-bottom: 32px;
+    max-width: 380px;
+  }
+
+  .why-right {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .why-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    transition: all 0.3s ease;
+    opacity: 0;
+    animation: fadeUp 0.5s ease forwards;
+  }
+
+  .why-card:hover {
+    border-color: var(--border2);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+  }
+
+  .why-card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .why-icon {
+    font-size: 22px;
+  }
+
+  .why-card-title {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    letter-spacing: 0.03em;
+    color: var(--text);
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
+
+  .why-card-desc {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  .bg-number {
+    position: absolute;
+    right: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--font-display);
+    font-size: 18rem;
+    color: rgba(255,255,255,0.015);
+    pointer-events: none;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    z-index: 0;
+    user-select: none;
+  }
+
+  @media (max-width: 960px) {
+    .why-inner {
+      grid-template-columns: 1fr;
+      gap: 48px;
+    }
+    .why-sub {
+      max-width: 100%;
+    }
+    .bg-number {
+      display: none;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .why-section {
+      padding: 70px 0;
+    }
+    .why-right {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
