@@ -25,14 +25,14 @@ const {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 
-  <!-- Favicon placeholder -->
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <!-- Official brand logo -->
+  <link rel="icon" type="image/jpeg" href="/email-signature/logo-main.jpg" />
 
   <!-- Open Graph -->
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://customer-assets.emergentagent.com/job_a118d919-7742-467e-8ca4-e3cd2b505786/artifacts/pcrks7pz_WhatsApp%20Image%202026-04-17%20at%2008.03.21.jpeg" />
+  <meta property="og:image" content={new URL('/email-signature/logo-main.jpg', Astro.site ?? Astro.url).href} />
 </head>
 <body>
   <slot />

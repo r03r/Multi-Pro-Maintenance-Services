@@ -20,7 +20,9 @@ Abre `http://localhost:4321/admin/`.
 - Numeración automática `EST-año-0001` e `INV-año-0001`.
 - Conversión de presupuesto a factura.
 - Estados y totales.
-- Impresión o guardado como PDF desde el navegador.
+- Impresión o guardado como PDF desde el navegador con el logo oficial.
+- Espera a que cargue el logo antes de habilitar la impresión; permite reintentar si falla.
+- Si el navegador bloquea la ventana del documento, muestra un aviso para permitirla.
 - Diseño adaptable a teléfono y computadora.
 - Datos locales mediante `localStorage`.
 
