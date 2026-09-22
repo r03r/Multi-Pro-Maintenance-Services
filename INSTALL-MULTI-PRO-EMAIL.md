@@ -25,7 +25,7 @@ git push origin main
 
 ## Pending items
 
-- Replace `FACEBOOK_PAGE_URL` with the real Facebook page URL.
+- Facebook and WhatsApp links are configured.
 - Add the selected gallery photographs later under `public/email-template/`.
 - The current Vercel preview is protected by login. Images in sent emails must be hosted on a public deployment or custom domain.
 
