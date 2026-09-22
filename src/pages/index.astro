@@ -28,8 +28,8 @@ import Chatbot from '../components/Chatbot.astro';
 <!-- Global i18n + interactions script -->
 <script>
   // ---- Language system ----
-  let currentLang = 'es';
-  window.__currentLang = 'es';
+  let currentLang = 'en';
+  window.__currentLang = 'en';
   window.__backendUrl = 'https://chatbot-reformas-la.preview.emergentagent.com';
 
   function applyLang(lang) {
@@ -40,11 +40,15 @@ import Chatbot from '../components/Chatbot.astro';
     document.querySelectorAll('[data-es][data-en]').forEach(el => {
       const txt = lang === 'en' ? el.dataset.en : el.dataset.es;
       if (txt !== undefined) {
-        // Don't change elements that are handled differently (chat chips, etc.)
         if (!el.classList.contains('chip-label')) {
           el.textContent = txt;
         }
       }
+    });
+
+    // Update placeholders
+    document.querySelectorAll('input[data-ph-en][data-ph-es]').forEach(el => {
+      el.placeholder = lang === 'en' ? el.dataset.phEn : el.dataset.phEs;
     });
 
     // Update lang buttons
@@ -54,7 +58,7 @@ import Chatbot from '../components/Chatbot.astro';
     // Update html lang
     document.documentElement.lang = lang;
 
-    // Update chat chips
+    // Update chat if exists
     if (window.__updateChatLang) window.__updateChatLang(lang);
 
     // Persist
@@ -65,9 +69,13 @@ import Chatbot from '../components/Chatbot.astro';
   document.getElementById('lang-es')?.addEventListener('click', () => applyLang('es'));
   document.getElementById('lang-en')?.addEventListener('click', () => applyLang('en'));
 
-  // Restore lang from storage
+  // Restore lang from storage or default to EN
   const savedLang = localStorage.getItem('mp_lang');
-  if (savedLang === 'en') applyLang('en');
+  if (savedLang) {
+    applyLang(savedLang);
+  } else {
+    applyLang('en');
+  }
 
   // ---- Header scroll effect ----
   const header = document.getElementById('header');
@@ -99,17 +107,22 @@ import Chatbot from '../components/Chatbot.astro';
   });
 
   // ---- Intersection Observer for animations ----
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  };
+
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        entry.target.style.animationPlayState = 'running';
-        observer.unobserve(entry.target);
+        entry.target.classList.add('active');
+        // Optional: stop observing once revealed
+        // observer.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.1 });
+  }, observerOptions);
 
-  document.querySelectorAll('.service-card, .why-card, .testimonial-card').forEach(el => {
-    el.style.animationPlayState = 'paused';
+  document.querySelectorAll('.reveal').forEach(el => {
     observer.observe(el);
   });
 </script>

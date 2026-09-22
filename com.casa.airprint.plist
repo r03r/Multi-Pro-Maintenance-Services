@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.casa.airprint</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/bin/dns-sd</string>
+        <string>-R</string>
+        <string>Samsung M2020 Casa</string>
+        <string>_ipp._tcp,_universal</string>
+        <string>.</string>
+        <string>631</string>
+        <string>txtvers=1</string>
+        <string>qtotal=1</string>
+        <string>rp=printers/M2020</string>
+        <string>ty=Samsung M2020 Series</string>
+        <string>adminurl=http://192.168.1.17:631/printers/M2020</string>
+        <string>pdl=application/pdf,image/urf</string>
+        <string>URF=V=1.4,CP=1,RS=600</string>
+        <string>Color=F</string>
+        <string>Duplex=F</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+</dict>
+</plist>
