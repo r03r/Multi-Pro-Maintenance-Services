@@ -30,7 +30,6 @@ import Chatbot from '../components/Chatbot.astro';
   // ---- Language system ----
   let currentLang = 'en';
   window.__currentLang = 'en';
-  window.__backendUrl = 'https://chatbot-reformas-la.preview.emergentagent.com';
 
   function applyLang(lang) {
     currentLang = lang;
@@ -62,7 +61,7 @@ import Chatbot from '../components/Chatbot.astro';
     if (window.__updateChatLang) window.__updateChatLang(lang);
 
     // Persist
-    localStorage.setItem('mp_lang', lang);
+    try { localStorage.setItem('mp_lang', lang); } catch { /* Storage may be disabled. */ }
   }
 
   // Lang button handlers
@@ -70,8 +69,9 @@ import Chatbot from '../components/Chatbot.astro';
   document.getElementById('lang-en')?.addEventListener('click', () => applyLang('en'));
 
   // Restore lang from storage or default to EN
-  const savedLang = localStorage.getItem('mp_lang');
-  if (savedLang) {
+  let savedLang = null;
+  try { savedLang = localStorage.getItem('mp_lang'); } catch { /* Use the default language. */ }
+  if (savedLang === 'es' || savedLang === 'en') {
     applyLang(savedLang);
   } else {
     applyLang('en');
@@ -93,17 +93,38 @@ import Chatbot from '../components/Chatbot.astro';
   // ---- Mobile hamburger ----
   const hamburger = document.getElementById('hamburger');
   const mobileMenu = document.getElementById('mobile-menu');
+  function closeMobileMenu(restoreFocus = false) {
+    hamburger?.classList.remove('open');
+    hamburger?.setAttribute('aria-expanded', 'false');
+    mobileMenu?.classList.remove('open');
+    if (mobileMenu) mobileMenu.inert = true;
+    document.body.style.overflow = '';
+    if (restoreFocus) hamburger?.focus();
+  }
   hamburger?.addEventListener('click', () => {
-    hamburger.classList.toggle('open');
-    mobileMenu?.classList.toggle('open');
+    if (mobileMenu?.classList.contains('open')) return closeMobileMenu(true);
+    hamburger.classList.add('open');
+    hamburger.setAttribute('aria-expanded', 'true');
+    if (mobileMenu) { mobileMenu.inert = false; mobileMenu.classList.add('open'); }
+    document.body.style.overflow = 'hidden';
+    document.getElementById('mobile-close')?.focus();
   });
-
-  // Close mobile menu on link click
+  document.getElementById('mobile-close')?.addEventListener('click', () => closeMobileMenu(true));
   document.querySelectorAll('.mobile-link').forEach(link => {
-    link.addEventListener('click', () => {
-      hamburger?.classList.remove('open');
-      mobileMenu?.classList.remove('open');
-    });
+    link.addEventListener('click', () => closeMobileMenu());
+  });
+  document.addEventListener('keydown', (event) => {
+    if (!mobileMenu?.classList.contains('open')) return;
+    if (event.key === 'Escape') closeMobileMenu(true);
+    if (event.key === 'Tab') {
+      const items = [...mobileMenu.querySelectorAll('a, button')];
+      const first = items[0], last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+    }
+  });
+  window.matchMedia('(min-width: 901px)').addEventListener('change', (event) => {
+    if (event.matches && mobileMenu?.classList.contains('open')) closeMobileMenu();
   });
 
   // ---- Intersection Observer for animations ----

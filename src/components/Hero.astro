@@ -10,19 +10,19 @@
       <!-- Medium Logo Display -->
       <div class="hero-main-logo reveal">
         <div class="hero-logo-wrapper">
-          <img src="/email-signature/logo-main.jpg" alt="Multi-Pro Logo" class="hero-logo-img" />
+          <img src="/brand/logo.png" alt="Multi-Pro Logo" class="hero-logo-img" width="612" height="408" fetchpriority="high" />
         </div>
       </div>
 
       <div class="hero-badge reveal">
         <span class="badge-dot"></span>
-        <span data-es="Professional Remodeling in Los Angeles" data-en="Professional Remodeling in Los Angeles">Professional Remodeling in Los Angeles</span>
+        <span data-es="Remodelación profesional en Los Ángeles" data-en="Professional Remodeling in Los Angeles">Professional Remodeling in Los Angeles</span>
       </div>
 
       <h1 class="hero-title reveal">
-        <span data-es="We Transform Your" data-en="We Transform Your">We Transform Your</span><br/>
-        <span class="gradient-text-orange" data-es="Home Into the Space" data-en="Home Into the Space">Home Into the Space</span><br/>
-        <span data-es="You Deserve" data-en="You Deserve">You Deserve</span>
+        <span data-es="Transformamos tu" data-en="We Transform Your">We Transform Your</span><br/>
+        <span class="gradient-text-orange" data-es="hogar en el espacio" data-en="Home Into the Space">Home Into the Space</span><br/>
+        <span data-es="que mereces" data-en="You Deserve">You Deserve</span>
       </h1>
 
       <p class="hero-sub reveal" data-es="Más de 12 años de experiencia transformando hogares en el área de Los Ángeles. Trabajo garantizado, presupuesto honesto." data-en="Over 12 years of experience transforming homes in the Los Angeles area. Guaranteed work, honest pricing.">
@@ -40,12 +40,12 @@
       <div class="hero-stats reveal">
         <div class="stat-item">
           <span class="stat-num">12+</span>
-          <span class="stat-label">Años</span>
+          <span class="stat-label" data-es="Años" data-en="Years">Años</span>
         </div>
         <div class="stat-divider"></div>
         <div class="stat-item">
           <span class="stat-num">500+</span>
-          <span class="stat-label">Proyectos</span>
+          <span class="stat-label" data-es="Proyectos" data-en="Projects">Proyectos</span>
         </div>
         <div class="stat-divider"></div>
         <div class="stat-item">
@@ -63,7 +63,7 @@
     display: flex;
     align-items: center;
     position: relative;
-    padding-top: 80px; /* Espacio para el header fijo */
+    padding-top: 120px; /* Espacio para el header fijo */
     padding-bottom: 80px;
     overflow: hidden;
     background: #000;
@@ -117,13 +117,12 @@
   }
 
   .hero-logo-wrapper {
-    width: 120px;
-    height: 120px;
+    width: clamp(220px, 25vw, 280px);
+    aspect-ratio: 3 / 2;
     border-radius: 28px;
     overflow: hidden;
-    background: #000;
-    border: 1px solid rgba(255, 90, 0, 0.2);
-    box-shadow: 0 0 40px rgba(255, 90, 0, 0.1);
+    background: transparent;
+    border: 0;
     transition: var(--transition-premium);
   }
 
@@ -137,6 +136,7 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
+    transform: scale(1.5);
   }
 
   .hero-badge {
@@ -201,7 +201,7 @@
     align-items: center;
     justify-content: center;
     gap: 20px;
-    margin-bottom: 100px;
+    margin-bottom: 48px;
   }
 
   .btn-orange-main {
@@ -291,6 +291,9 @@
   }
 
   @media (max-width: 768px) {
+    .hero-title { font-size: clamp(2rem, 8.8vw, 3.6rem); margin: 16px 0 24px; }
+    .hero-badge { margin-bottom: 16px; font-size: 12px; }
+    .hero-sub { margin-bottom: 28px; }
     .hero-actions {
       flex-direction: column;
       width: 100%;

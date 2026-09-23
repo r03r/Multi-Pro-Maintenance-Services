@@ -2,7 +2,7 @@
 ---
 <div class="fab-container" id="fab-container">
   <!-- The Menu (Hidden by default) -->
-  <div class="contact-menu" id="contact-menu">
+  <div class="contact-menu" id="contact-menu" inert>
     <div class="menu-header">
       <span data-es="Contacto Directo" data-en="Direct Contact">Contacto Directo</span>
     </div>
@@ -36,7 +36,7 @@
       </a>
 
       <!-- Quick Quote -->
-      <button onclick="openChatFromFab()" class="menu-item quote-item">
+      <button id="fab-quote" class="menu-item quote-item">
         <div class="item-icon">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 20h9"></path>
@@ -45,14 +45,14 @@
         </div>
         <div class="item-text">
           <span class="item-label" data-es="COTIZACIÓN RÁPIDA" data-en="QUICK QUOTE">COTIZACIÓN RÁPIDA</span>
-          <span class="item-value" data-es="Asistente IA" data-en="AI Assistant">Asistente IA</span>
+          <span class="item-value" data-es="Solicitar presupuesto" data-en="Request an estimate">Solicitar presupuesto</span>
         </div>
       </button>
     </div>
   </div>
 
   <!-- Main Toggle Button -->
-  <button class="main-fab" id="main-fab" onclick="toggleFabMenu()" aria-label="Contacto">
+  <button class="main-fab" id="main-fab" aria-label="Contacto" aria-expanded="false" aria-controls="contact-menu">
     <div class="fab-icons">
         <svg class="icon-contact" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -92,21 +92,28 @@
   // Run on load
   detectOS();
 
-  // ---- UI Logic ----
-  function toggleFabMenu() {
-    const container = document.getElementById('fab-container');
-    container.classList.toggle('active');
+  // Keep event handlers in the module instead of referencing them from inline HTML.
+  const container = document.getElementById('fab-container');
+  const trigger = document.getElementById('main-fab');
+  const menu = document.getElementById('contact-menu');
+  function setOpen(open) {
+    container?.classList.toggle('active', open);
+    trigger?.setAttribute('aria-expanded', String(open));
+    if (menu) menu.inert = !open;
   }
-
-  function openChatFromFab() {
-    toggleFabMenu();
-    if (window.openChat) window.openChat();
-  }
-
-  document.addEventListener('click', (e) => {
-    const container = document.getElementById('fab-container');
-    if (container && !container.contains(e.target) && container.classList.contains('active')) {
-      container.classList.remove('active');
+  trigger?.addEventListener('click', () => setOpen(!container?.classList.contains('active')));
+  document.getElementById('fab-quote')?.addEventListener('click', () => {
+    setOpen(false);
+    trigger?.focus();
+    window.openChat?.();
+  });
+  document.addEventListener('click', (event) => {
+    if (event.target instanceof Node && !container?.contains(event.target)) setOpen(false);
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && container?.classList.contains('active')) {
+      setOpen(false);
+      trigger?.focus();
     }
   });
 </script>
@@ -180,7 +187,7 @@
     position: absolute;
     bottom: 84px;
     right: 0;
-    width: 300px;
+    width: min(300px, calc(100vw - 40px));
     background: rgba(20, 20, 22, 0.85);
     backdrop-filter: blur(30px) saturate(160%);
     -webkit-backdrop-filter: blur(30px) saturate(160%);
@@ -188,6 +195,7 @@
     border-radius: 28px;
     overflow: hidden;
     opacity: 0;
+    visibility: hidden;
     transform: translateY(20px) scale(0.95);
     pointer-events: none;
     transition: var(--transition-premium);
@@ -196,6 +204,7 @@
 
   .fab-container.active .contact-menu {
     opacity: 1;
+    visibility: visible;
     transform: translateY(0) scale(1);
     pointer-events: all;
   }

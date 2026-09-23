@@ -8,13 +8,13 @@ const budgetKeys = ["budget_1", "budget_2", "budget_3", "budget_4", "budget_5"];
 const timeKeys = ["time_1", "time_2", "time_3", "time_4"];
 ---
 
-<div class="chat-overlay" id="chat-overlay" onclick="chatOverlayClick(event)">
-  <div class="chat-modal" id="chat-modal">
+<div class="chat-overlay" id="chat-overlay" inert onclick="chatOverlayClick(event)">
+  <div class="chat-modal" id="chat-modal" role="dialog" aria-modal="true" aria-label="MULTI-PRO — Solicitar presupuesto">
     <!-- Header -->
     <div class="chat-header">
       <div class="chat-header-left">
         <div class="chat-avatar">
-          <img src="/email-signature/logo-main.jpg" alt="Multi-Pro" width="36" height="36" />
+          <img src="/brand/logo.png" alt="Multi-Pro" width="36" height="36" />
         </div>
         <div>
           <span class="chat-name">Multi-Pro Assistant</span>
@@ -36,8 +36,8 @@ const timeKeys = ["time_1", "time_2", "time_3", "time_4"];
     <div class="chat-footer" id="chat-footer">
       <!-- Text input -->
       <div class="chat-input-row" id="chat-text-input" style="display:none">
-        <input type="text" id="chat-text-field" class="chat-input" placeholder="" autocomplete="off" />
-        <button class="chat-send-btn" id="chat-send-btn" onclick="chatSendText()">
+        <input type="text" id="chat-text-field" aria-label="Tu respuesta" class="chat-input" placeholder="" autocomplete="off" />
+        <button class="chat-send-btn" id="chat-send-btn" aria-label="Enviar respuesta" onclick="chatSendText()">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
         </button>
       </div>
@@ -94,13 +94,21 @@ const timeKeys = ["time_1", "time_2", "time_3", "time_4"];
   let chatLang = window.__currentLang || "en";
   let chatStep = "idle"; 
   let chatData = {};
+  let previousFocus = null;
+  const pendingTimers = new Set();
+  function schedule(callback, delay) {
+    const timer = setTimeout(() => { pendingTimers.delete(timer); callback(); }, delay);
+    pendingTimers.add(timer);
+  }
+  function clearTimers() { pendingTimers.forEach(clearTimeout); pendingTimers.clear(); }
+
 
   const PROGRESS = { service: 15, address: 30, budget: 45, timeline: 60, name: 75, phone: 90, done: 100 };
 
   function tt(key, vars = {}) {
     let entry = TRANSLATIONS[key] || TRANSLATIONS["chat_" + key];
     let str = entry?.[chatLang] || entry?.es || key;
-    for (const [k, v] of Object.entries(vars)) str = str.replaceAll(`{${k}}`, v);
+    for (const [k, v] of Object.entries(vars)) str = str.replaceAll(`{${k}}`, () => String(v));
     return str;
   }
 
@@ -117,7 +125,10 @@ const timeKeys = ["time_1", "time_2", "time_3", "time_4"];
 
     const bubble = document.createElement("div");
     bubble.className = `bubble bubble-${type} ${type === "bot" ? "latest-prompt" : ""} ${step ? 'step-' + step : ''}`;
-    bubble.innerHTML = `<div class="bubble-inner">${text}</div>`;
+    const inner = document.createElement("div");
+    inner.className = "bubble-inner";
+    inner.textContent = text;
+    bubble.appendChild(inner);
     msgs.appendChild(bubble);
     msgs.scrollTo({ top: msgs.scrollHeight, behavior: 'smooth' });
   }
@@ -152,27 +163,34 @@ const timeKeys = ["time_1", "time_2", "time_3", "time_4"];
         if (el) el.style.display = "flex";
         if (type === "text") {
           const field = document.getElementById("chat-text-field");
-          if (field) field.focus();
+          if (field && document.getElementById("chat-overlay")?.classList.contains("open")) field.focus();
         }
     }
   }
 
   function botSay(text, step = "", delay = 600) {
     addTyping();
-    setTimeout(() => { removeTyping(); addBubble(text, "bot", step); }, delay);
+    schedule(() => { removeTyping(); addBubble(text, "bot", step); }, delay);
   }
 
   window.startChat = function() {
+    clearTimers();
+    chatStep = "loading";
+    showInput("none");
     chatData = {};
+    const field = document.getElementById("chat-text-field");
+    if (field) { field.type = "text"; field.inputMode = "text"; field.value = ""; field.setCustomValidity(""); }
     const msgs = $msgs();
     if (msgs) msgs.innerHTML = "";
     chatLang = window.__currentLang || "en";
     setProgress("service");
     addBubble(tt("chat_greeting"), "bot");
-    setTimeout(() => { botSay(tt("chat_q_service"), "service"); showInput("service"); chatStep = "service"; }, 800);
+    schedule(() => { addBubble(tt("chat_q_service"), "bot", "service"); showInput("service"); chatStep = "service"; }, 800);
   }
 
   window.chatPickService = function(key) {
+    if (chatStep !== "service") return;
+    showInput("none");
     const btn = document.querySelector(`[data-key="${key}"]`);
     const label = btn?.querySelector(".chip-label");
     const display = label ? (chatLang === "en" ? label.dataset.en : label.dataset.es) : key;
@@ -180,17 +198,20 @@ const timeKeys = ["time_1", "time_2", "time_3", "time_4"];
     addBubble(display, "user");
     setProgress("address");
     botSay(tt("chat_q_address", { service: display }), "address");
-    setTimeout(() => showInput("city"), 800);
+    schedule(() => showInput("city"), 800);
     chatStep = "address";
   }
 
   window.chatPickCity = function(city) {
+    if (chatStep !== "address") return;
+    showInput("none");
     addBubble(city, "user");
     chatData.address = city;
     toBudget();
   }
 
   window.switchToManualCity = function() {
+    if (chatStep !== "address") return;
     const field = document.getElementById("chat-text-field");
     if (field) field.placeholder = tt("ph_address");
     showInput("text");
@@ -199,22 +220,26 @@ const timeKeys = ["time_1", "time_2", "time_3", "time_4"];
   function toBudget() {
     setProgress("budget");
     botSay(tt("chat_q_budget"), "budget");
-    setTimeout(() => showInput("budget"), 800);
+    schedule(() => showInput("budget"), 800);
     chatStep = "budget";
   }
 
   window.chatPickBudget = function(btn) {
+    if (chatStep !== "budget") return;
+    showInput("none");
     const label = btn.querySelector(".chip-label");
     const display = chatLang === "en" ? label.dataset.en : label.dataset.es;
     chatData.budget = display;
     addBubble(display, "user");
     setProgress("timeline");
     botSay(tt("chat_q_timeline"), "timeline");
-    setTimeout(() => showInput("timeline"), 800);
+    schedule(() => showInput("timeline"), 800);
     chatStep = "timeline";
   }
 
   window.chatPickTimeline = function(btn) {
+    if (chatStep !== "timeline") return;
+    showInput("none");
     const label = btn.querySelector(".chip-label");
     const display = chatLang === "en" ? label.dataset.en : label.dataset.es;
     chatData.timeline = display;
@@ -223,19 +248,29 @@ const timeKeys = ["time_1", "time_2", "time_3", "time_4"];
     botSay(tt("chat_q_name"), "name");
     const field = document.getElementById("chat-text-field");
     if (field) field.placeholder = tt("ph_name");
-    setTimeout(() => showInput("text"), 800);
+    schedule(() => showInput("text"), 800);
     chatStep = "name";
   }
 
   window.chatSendText = function() {
     const field = document.getElementById("chat-text-field");
     const val = field?.value.trim();
-    if (!val) return;
+    if (!val || !['address', 'name', 'phone'].includes(chatStep)) return;
+    if (chatStep === 'phone' && !/^\+?[0-9 ()-]+$/.test(val)) {
+      field.setCustomValidity(chatLang === 'en' ? 'Enter a valid phone number.' : 'Escribe un teléfono válido.');
+      field.reportValidity(); return;
+    }
+    if (chatStep === 'phone' && (val.replace(/\D/g, '').length < 7 || val.replace(/\D/g, '').length > 15)) {
+      field.setCustomValidity(chatLang === 'en' ? 'Use 7 to 15 digits.' : 'Usa entre 7 y 15 dígitos.');
+      field.reportValidity(); return;
+    }
+    field.setCustomValidity('');
     field.value = "";
     addBubble(val, "user");
 
     if (chatStep === "address") {
       chatData.address = val;
+      showInput("none");
       toBudget();
     } else if (chatStep === "name") {
       chatData.name = val;
@@ -243,6 +278,8 @@ const timeKeys = ["time_1", "time_2", "time_3", "time_4"];
       botSay(tt("chat_q_phone", { name: val }), "phone");
       if (field) field.placeholder = tt("ph_phone");
       chatStep = "phone";
+      field.type = "tel";
+      field.inputMode = "tel";
     } else if (chatStep === "phone") {
       chatData.phone = val;
       finishChat();
@@ -250,13 +287,14 @@ const timeKeys = ["time_1", "time_2", "time_3", "time_4"];
   }
 
   function finishChat() {
+    showInput("none");
     setProgress("done");
     chatStep = "done";
     botSay(tt("chat_done"), "done");
     const waText = buildWAText();
     const waBtn = document.getElementById("chat-wa-btn");
     if (waBtn) waBtn.href = `https://wa.me/13239707517?text=${encodeURIComponent(waText)}`;
-    setTimeout(() => showInput("done"), 1000);
+    schedule(() => showInput("done"), 1000);
   }
 
   function buildWAText() {
@@ -280,7 +318,10 @@ const timeKeys = ["time_1", "time_2", "time_3", "time_4"];
   window.openChat = function() {
     const overlay = document.getElementById("chat-overlay");
     if (overlay) {
+      previousFocus = document.activeElement;
+      overlay.inert = false;
       overlay.classList.add("open");
+      overlay.querySelector(".chat-close")?.focus();
       document.body.style.overflow = "hidden";
       if (chatStep === "idle") startChat();
     }
@@ -289,6 +330,8 @@ const timeKeys = ["time_1", "time_2", "time_3", "time_4"];
     const overlay = document.getElementById("chat-overlay");
     if (overlay) {
       overlay.classList.remove("open");
+      overlay.inert = true;
+      previousFocus?.focus();
       document.body.style.overflow = "";
     }
   };
@@ -310,15 +353,27 @@ const timeKeys = ["time_1", "time_2", "time_3", "time_4"];
     }
   };
 
+  document.addEventListener('keydown', (event) => {
+    const overlay = document.getElementById('chat-overlay');
+    if (!overlay?.classList.contains('open')) return;
+    if (event.key === 'Escape') window.closeChat();
+    if (event.key === 'Tab') {
+      const items = [...overlay.querySelectorAll('a, button, input')].filter(el => el.getClientRects().length && !el.disabled);
+      const first = items[0], last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+    }
+  });
   document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("chat-text-field")?.addEventListener("input", (e) => e.target.setCustomValidity(''));
     document.getElementById("chat-text-field")?.addEventListener("keydown", (e) => { if (e.key === "Enter") chatSendText(); });
   });
 </script>
 
 <style>
-  .chat-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(0, 0, 0, 0.7); display: flex; align-items: flex-end; justify-content: flex-end; padding: 24px; opacity: 0; pointer-events: none; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-  .chat-overlay.open { opacity: 1; pointer-events: all; }
-  .chat-modal { width: 100%; max-width: 420px; height: 650px; background: #0F0F10; border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 40px 80px rgba(0,0,0,0.6); transform: translateY(40px) scale(0.95); transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+  .chat-overlay { position: fixed; inset: 0; z-index: 1100; background: rgba(0, 0, 0, 0.7); display: flex; align-items: flex-end; justify-content: flex-end; padding: 24px; visibility: hidden; opacity: 0; pointer-events: none; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+  .chat-overlay.open { visibility: visible; opacity: 1; pointer-events: all; }
+  .chat-modal { width: 100%; max-width: 420px; height: min(650px, calc(100dvh - 48px)); background: #0F0F10; border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 40px 80px rgba(0,0,0,0.6); transform: translateY(40px) scale(0.95); transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
   .chat-overlay.open .chat-modal { transform: translateY(0) scale(1); }
   .chat-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; background: rgba(20,20,22,0.8); border-bottom: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(10px); }
   .chat-header-left { display: flex; align-items: center; gap: 14px; }

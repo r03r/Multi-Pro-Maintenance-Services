@@ -66,7 +66,7 @@ export const t = {
   chat_q_timeline: { es: "¿Cuál es su prioridad de inicio?", en: "What is your start priority?" },
   chat_q_name: { es: "¡Perfecto! Ya casi terminamos. ¿A nombre de quién registramos la solicitud?", en: "Perfect! We're almost done. Under whose name should we register the request?" },
   chat_q_phone: { es: "Por último, {name}, ¿a qué número podemos enviarle la propuesta detallada?", en: "Finally, {name}, at what number can we send you the detailed proposal?" },
-  chat_done: { es: "Solicitud procesada con éxito. Un especialista técnico revisará los detalles y le contactará vía WhatsApp.", en: "Request successfully processed. A technical specialist will review the details and contact you via WhatsApp." },
+  chat_done: { es: "Tu consulta está preparada. Pulsa el botón de WhatsApp y envía el mensaje para que podamos responderte.", en: "Your inquiry is ready. Tap WhatsApp and send the message so our team can respond." },
   chat_wa_btn: { es: "📱 Confirmar vía WhatsApp", en: "📱 Confirm via WhatsApp" },
   chat_restart: { es: "Nueva Solicitud", en: "New Request" },
   ph_name: { es: "Nombre completo...", en: "Full name..." },
@@ -95,7 +95,7 @@ export const SERVICES = [
   },
   {
     key: "bathroom",
-    es: "Santuriarios y Baños",
+    es: "Santuarios y Baños",
     en: "Bathrooms & Sanctuaries",
     icon: "🚿",
     image: "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=600&q=80",

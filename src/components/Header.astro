@@ -5,14 +5,11 @@
     <div class="header-glass">
       <div class="header-inner">
         <!-- Local Brand Logo -->
-        <a href="/" class="logo">
+        <a href="/" class="logo" aria-label="MULTI-PRO inicio">
           <div class="logo-frame">
-            <img src="/email-signature/logo-main.jpg" alt="Multi-Pro Logo" class="logo-img" />
+            <img src="/brand/logo.png" alt="Multi-Pro Logo" class="logo-img" width="612" height="408" />
           </div>
-          <div class="logo-text">
-            <span class="logo-name">MULTI<span class="text-orange">-</span>PRO</span>
-            <span class="logo-tagline" data-es="EXCELENCIA EN CONSTRUCCIÓN" data-en="CONSTRUCTION EXCELLENCE">EXCELENCIA EN CONSTRUCCIÓN</span>
-          </div>
+
         </a>
 
         <!-- Desktop Navigation -->
@@ -35,7 +32,7 @@
           </button>
 
           <!-- Mobile Toggle -->
-          <button class="menu-toggle" id="hamburger" aria-label="Menu">
+          <button class="menu-toggle" id="hamburger" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobile-menu">
             <div class="bar"></div>
             <div class="bar"></div>
           </button>
@@ -45,17 +42,18 @@
   </div>
 
   <!-- Mobile Menu Layer -->
-  <div class="mobile-nav" id="mobile-menu">
+  <nav class="mobile-nav" id="mobile-menu" aria-label="Navegación móvil" inert>
+    <button type="button" class="mobile-close" id="mobile-close" aria-label="Cerrar menú">✕</button>
     <div class="mobile-nav-inner">
-      <a href="#services" class="mobile-link">Servicios</a>
-      <a href="#why" class="mobile-link">Excelencia</a>
-      <a href="#testimonials" class="mobile-link">Clientes</a>
-      <a href="#contact" class="mobile-link">Contacto</a>
+      <a href="#services" class="mobile-link" data-es="Servicios" data-en="Services">Servicios</a>
+      <a href="#why" class="mobile-link" data-es="Excelencia" data-en="Excellence">Excelencia</a>
+      <a href="#testimonials" class="mobile-link" data-es="Clientes" data-en="Clients">Clientes</a>
+      <a href="#contact" class="mobile-link" data-es="Contacto" data-en="Contact">Contacto</a>
       <div class="mobile-footer">
-        <a href="tel:+13239707517" class="mobile-btn">Llamar Ahora</a>
+        <a href="tel:+13239707517" class="mobile-btn" data-es="Llamar Ahora" data-en="Call Now">Llamar Ahora</a>
       </div>
     </div>
-  </div>
+  </nav>
 </header>
 
 <style>
@@ -100,12 +98,13 @@
   }
 
   .logo-frame {
-    width: 42px;
-    height: 42px;
+    width: 142px;
+    height: 64px;
+    flex-shrink: 0;
     border-radius: 12px;
     overflow: hidden;
-    border: 1.5px solid rgba(255, 255, 255, 0.1);
-    background: #000;
+    border: 0;
+    background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -115,6 +114,7 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
+    transform: scale(1.5);
   }
 
   .logo-text {
@@ -240,10 +240,10 @@
     transition: all 0.3s ease;
   }
 
-  .hamburger.open .bar:nth-child(1) {
+  .menu-toggle.open .bar:nth-child(1) {
     transform: translateY(4px) rotate(45deg);
   }
-  .hamburger.open .bar:nth-child(2) {
+  .menu-toggle.open .bar:nth-child(2) {
     transform: translateY(-4px) rotate(-45deg);
   }
 
@@ -253,7 +253,9 @@
     top: 0;
     left: 0;
     width: 100%;
-    height: 100vh;
+    height: 100dvh;
+    z-index: 2;
+    overflow-y: auto;
     background: rgba(0, 0, 0, 0.95);
     backdrop-filter: blur(20px);
     display: flex;
@@ -297,14 +299,17 @@
   }
 
   @media (max-width: 900px) {
-    .nav, .lang-selector, .btn-cta {
+    .nav, .btn-cta {
       display: none;
     }
     .menu-toggle {
       display: flex;
     }
+    .header-actions { gap: 8px; }
+    .lang-option { padding: 7px; }
     .header-glass {
-      padding: 0 16px;
+      padding: 0 12px;
     }
   }
+  .mobile-close { position: absolute; right: 24px; top: 24px; padding: 12px; color: white; background: transparent; border: 1px solid #777; border-radius: 12px; cursor: pointer; }
 </style>

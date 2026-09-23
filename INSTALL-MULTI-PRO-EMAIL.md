@@ -13,9 +13,10 @@ Los HTML mantienen URLs absolutas HTTPS para que las imágenes funcionen al copi
 la firma o enviar el correo. Se conservan los originales `logo-main.jpg`,
 `facebook.png` y `whatsapp.png` de cada carpeta.
 
-La landing también reutiliza `/email-signature/logo-main.jpg` en la cabecera,
-bloque principal, chat, pie, favicon y vista previa social. Se eliminaron las
-referencias a `/logo-new.png`, `/favicon.svg` y al logo externo de Emergent.
+La landing usa `/brand/logo.png`, una copia sin modificaciones del logo transparente
+preparado en EVERTH, en cabecera, bloque principal, chat, pie y favicon. Los correos,
+PDF y vista previa social conservan el JPG existente. Las imágenes mantienen su
+proporción; se eliminaron las referencias al logo externo y a `/logo-new.png`.
 
 Facebook oficial: https://www.facebook.com/people/Multi-Pro-Maintenance-Services/61588758281593/?sfnsn=wa&mibextid=RUbZ1f
 
@@ -53,22 +54,14 @@ pnpm preview
 
 Abrir `/email-signature/`, `/email-template/`, `/sitemap.xml` y `/robots.txt` en la
 dirección local indicada por Astro. Las imágenes de los correos se cargan desde
-producción por diseño. El build también genera `.vercel/output/static`.
+producción por diseño.
 
-Revisar y confirmar solo los archivos fuente de esta integración:
+`vercel.json` instala con el lockfile y compila el código fuente a `dist`.
+`.vercel/`, `dist/` y `node_modules/` no se versionan. Se retiró el adaptador Vercel
+porque todas las rutas son estáticas. No publicar con `--prebuilt` ni volver a
+subir `.vercel/output`: Vercel priorizaba esos archivos antiguos y omitía el build,
+por lo que los cambios de código no aparecían en producción.
 
-```bash
-git diff --check
-git diff
-git add public/email-signature/index.html public/email-template/index.html astro.config.mjs package.json pnpm-lock.yaml src/pages/robots.txt.ts src/pages/sitemap.xml.ts src/components/Header.astro src/components/Hero.astro src/components/Chatbot.astro src/components/Footer.astro src/layouts/Layout.astro public/admin/admin.js INSTALL-MULTI-PRO-ADMIN.md INSTALL-MULTI-PRO-EMAIL.md
-git commit -m "Fix logos in PDF documents, landing, and emails; add sitemap"
-git push origin main
-```
-
-El push activa el despliegue si Vercel sigue conectado a `main`. El repositorio ya
-versiona parte de `.vercel/output`; no incluir los cambios generados por el build
-ni añadir `dist`, `node_modules` o archivos de entorno a este commit.
-
-La compilación actual funciona. El adaptador existente `@astrojs/vercel` 8 declara
-compatibilidad con Astro 5 y emite una advertencia de obsolescencia con Astro 7;
-su actualización mayor queda fuera de esta integración.
+Después de revisar y confirmar los cambios, un push a `main` activa Vercel si
+la integración Git sigue conectada. Verificar en los registros que se ejecuta
+`pnpm build`, y comprobar logos, contacto y PDF en el dominio estable.

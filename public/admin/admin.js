@@ -5,13 +5,66 @@ let state=JSON.parse(localStorage.getItem(STORE_KEY)||'{"customers":[],"estimate
 const $=id=>document.getElementById(id);
 const money=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(n)||0);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const number=(prefix,list)=>`${prefix}-${new Date().getFullYear()}-${String(list.length+1).padStart(4,'0')}`;
+const number = (prefix, list) => {
+  const base = `${prefix}-${new Date().getFullYear()}-`;
+  const latest = list.reduce((max, record) => {
+    const suffix = String(record.number || '').startsWith(base) ? String(record.number).slice(base.length) : '';
+    return /^\d+$/.test(suffix) ? Math.max(max, Number(suffix)) : max;
+  }, 0);
+  return `${base}${String(latest + 1).padStart(4, '0')}`;
+};
 function save(){localStorage.setItem(STORE_KEY,JSON.stringify(state));render()}
 function setView(name){document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===`${name}-view`));document.querySelectorAll('.nav-item').forEach(v=>v.classList.toggle('active',v.dataset.view===name));$('view-title').textContent=labels[name];$('primary-action').textContent=actions[name];$('primary-action').dataset.view=name}
 document.querySelectorAll('.nav-item').forEach(b=>b.onclick=()=>setView(b.dataset.view));
 $('primary-action').onclick=()=>openForm($('primary-action').dataset.view||'customers');
-function openForm(view){const type=view==='customers'?'customer':view==='estimates'?'estimate':'invoice';$('record-type').value=type;$('dialog-title').textContent=type==='customer'?'Nuevo cliente':type==='estimate'?'Nuevo presupuesto':'Nueva factura';$('customer-fields').classList.toggle('hidden',type!=='customer');$('document-fields').classList.toggle('hidden',type==='customer');if(type!=='customer'){$('document-customer').innerHTML=state.customers.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');if(!state.customers.length){alert('Primero agrega un cliente.');setView('customers');return}}$('record-form').reset();$('record-type').value=type;$('document-quantity').value=1;$('record-dialog').showModal()}
-$('record-form').addEventListener('submit',e=>{if(e.submitter?.value==='cancel')return; e.preventDefault();const type=$('record-type').value;if(type==='customer'){const name=$('customer-name').value.trim();if(!name)return alert('Escribe el nombre del cliente.');state.customers.unshift({id:crypto.randomUUID(),name,company:$('customer-company').value.trim(),phone:$('customer-phone').value.trim(),email:$('customer-email').value.trim(),address:$('customer-address').value.trim(),createdAt:Date.now()})}else{const list=type==='estimate'?state.estimates:state.invoices;const q=Number($('document-quantity').value)||1,p=Number($('document-price').value)||0,t=Number($('document-tax').value)||0,subtotal=q*p;list.unshift({id:crypto.randomUUID(),number:number(type==='estimate'?'EST':'INV',list),customerId:$('document-customer').value,description:$('document-description').value.trim(),quantity:q,price:p,tax:t,total:subtotal+(subtotal*t/100),status:$('document-status').value,notes:$('document-notes').value.trim(),createdAt:Date.now()})}save();$('record-dialog').close()});
+function openForm(view) {
+  const type = view === 'estimates' ? 'estimate' : view === 'invoices' ? 'invoice' : 'customer';
+  if (type !== 'customer' && !state.customers.length) {
+    alert('Primero agrega un cliente.');
+    setView('customers');
+    return;
+  }
+  $('record-form').reset();
+  $('record-type').value = type;
+  $('dialog-title').textContent = type === 'customer' ? 'Nuevo cliente' : type === 'estimate' ? 'Nuevo presupuesto' : 'Nueva factura';
+  for (const [id, active] of [['customer-fields', type === 'customer'], ['document-fields', type !== 'customer']]) {
+    $(id).classList.toggle('hidden', !active);
+    $(id).querySelectorAll('input, select, textarea').forEach(field => { field.disabled = !active; });
+  }
+  if (type !== 'customer') {
+    $('document-customer').innerHTML = state.customers.map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
+  }
+  $('record-dialog').showModal();
+}
+$('close-record').onclick = $('cancel-record').onclick = () => $('record-dialog').close();
+$('record-form').addEventListener('submit', e => {
+  e.preventDefault();
+  if (!$('record-form').reportValidity()) return;
+  const type = $('record-type').value;
+  if (type === 'customer') {
+    const name = $('customer-name').value.trim();
+    if (!name) return alert('Escribe el nombre del cliente.');
+    state.customers.unshift({id:crypto.randomUUID(),name,company:$('customer-company').value.trim(),phone:$('customer-phone').value.trim(),email:$('customer-email').value.trim(),address:$('customer-address').value.trim(),createdAt:Date.now()});
+  } else {
+    if (type !== 'estimate' && type !== 'invoice') return;
+    const customerId = $('document-customer').value;
+    const description = $('document-description').value.trim();
+    if (!state.customers.some(c => c.id === customerId)) return alert('Selecciona un cliente válido.');
+    if (!description) return alert('Escribe la descripción del trabajo.');
+    const q = Number($('document-quantity').value);
+    const p = Number($('document-price').value);
+    const t = Number($('document-tax').value);
+    const subtotal = q * p;
+    const total = subtotal + subtotal * t / 100;
+    if (!Number.isInteger(q) || q < 1 || !Number.isFinite(p) || p < 0 || !Number.isFinite(t) || t < 0 || !Number.isFinite(total)) {
+      return alert('Revisa la cantidad, el precio y el impuesto. Deben ser números válidos y no negativos.');
+    }
+    const list = type === 'estimate' ? state.estimates : state.invoices;
+    list.unshift({id:crypto.randomUUID(),number:number(type === 'estimate' ? 'EST' : 'INV',list),customerId,description,quantity:q,price:p,tax:t,total,status:$('document-status').value,notes:$('document-notes').value.trim(),createdAt:Date.now()});
+  }
+  save();
+  $('record-dialog').close();
+});
 function customerName(id){return state.customers.find(c=>c.id===id)?.name||'Cliente eliminado'}
 function docRows(items,type){if(!items.length)return '<div class="empty">Todavía no hay registros.</div>';return items.map(d=>`<div class="data-row"><div><strong>${esc(d.number)}</strong><div class="muted">${esc(customerName(d.customerId))}</div></div><span>${money(d.total)}</span><span class="badge ${esc(d.status)}">${esc(d.status)}</span><div class="row-actions"><button onclick="printDoc('${type}','${d.id}')">Imprimir</button>${type==='estimate'?`<button onclick="convertEstimate('${d.id}')">Facturar</button>`:''}<button onclick="deleteRecord('${type}','${d.id}')">Eliminar</button></div></div>`).join('')}
 function render(){ $('stat-customers').textContent=state.customers.length;$('stat-estimates').textContent=state.estimates.length;$('stat-invoiced').textContent=money(state.invoices.reduce((s,x)=>s+x.total,0));$('stat-pending').textContent=money(state.invoices.filter(x=>x.status!=='paid').reduce((s,x)=>s+x.total,0));$('customers-list').innerHTML=state.customers.length?state.customers.map(c=>`<div class="data-row"><div><strong>${esc(c.name)}</strong><div class="muted">${esc(c.company||c.address||'Sin empresa')}</div></div><span>${esc(c.phone||'Sin teléfono')}</span><span>${esc(c.email||'Sin correo')}</span><div class="row-actions"><button onclick="deleteRecord('customer','${c.id}')">Eliminar</button></div></div>`).join(''):'<div class="empty">Agrega tu primer cliente.</div>';$('estimates-list').innerHTML=docRows(state.estimates,'estimate');$('invoices-list').innerHTML=docRows(state.invoices,'invoice');const recent=[...state.estimates.map(x=>({...x,type:'Presupuesto'})),...state.invoices.map(x=>({...x,type:'Factura'}))].sort((a,b)=>b.createdAt-a.createdAt).slice(0,5);$('recent-list').innerHTML=recent.length?recent.map(x=>`<div class="data-row"><div><strong>${esc(x.number)}</strong><div class="muted">${esc(x.type)} · ${esc(customerName(x.customerId))}</div></div><span>${money(x.total)}</span><span class="badge ${esc(x.status)}">${esc(x.status)}</span><span></span></div>`).join(''):'Todavía no hay documentos.'}
