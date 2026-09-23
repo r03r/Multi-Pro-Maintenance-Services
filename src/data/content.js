@@ -60,6 +60,12 @@ export const t = {
   // Chatbot - Reordered Flow (Project First)
   chat_title: { es: "Presupuesto Inmediato", en: "Instant Quote" },
   chat_greeting: { es: "Bienvenido a Multi-Pro. Para brindarle una propuesta precisa, cuéntenos sobre su proyecto.", en: "Welcome to Multi-Pro. To provide an accurate proposal, tell us about your project." },
+  chat_project_invalid: { es: "Describe el trabajo con entre 10 y 1000 caracteres, o elige un servicio abajo.", en: "Describe the work in 10–1000 characters, or choose a service below." },
+  chat_project_loading: { es: "Buscando el servicio adecuado… También puedes elegirlo abajo.", en: "Finding a matching service… You can also choose one below." },
+  chat_project_suggestion: { es: "Servicio sugerido: {service}. ¿Es correcto?", en: "Suggested service: {service}. Is that right?" },
+  chat_project_manual: { es: "Elige el servicio que necesitas abajo.", en: "Choose the service you need below." },
+  chat_project_unclear: { es: "Necesitamos que confirmes qué servicio necesitas. Elige uno abajo.", en: "Please confirm which service you need by choosing one below." },
+  chat_project_unavailable: { es: "No pudimos sugerir un servicio ahora. Puedes elegirlo abajo y continuar.", en: "We couldn't suggest a service right now. Choose one below to continue." },
   chat_q_service: { es: "¿Qué área de su residencia desea transformar?", en: "Which area of your residence do you wish to transform?" },
   chat_q_address: { es: "Entendido, {service}. ¿En qué zona o ciudad se encuentra la propiedad?", en: "Understood, {service}. In which area or city is the property located?" },
   chat_q_budget: { es: "¿Qué rango de inversión tiene contemplado para esta obra?", en: "What investment range have you considered for this project?" },

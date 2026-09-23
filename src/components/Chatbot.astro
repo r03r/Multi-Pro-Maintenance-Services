@@ -42,6 +42,18 @@ const timeKeys = ["time_1", "time_2", "time_3", "time_4"];
         </button>
       </div>
 
+      <div id="chat-project" class="chat-project" style="display:none">
+        <label for="chat-project-description" data-es="Describe el trabajo (opcional)" data-en="Describe the work (optional)">Describe the work (optional)</label>
+        <textarea id="chat-project-description" rows="2" minlength="10" maxlength="1000" aria-describedby="chat-project-notice" placeholder="e.g. Replace the cabinets in my kitchen"></textarea>
+        <small id="chat-project-notice" data-es="Al solicitar una sugerencia, TypeSafe analizará esta descripción. No incluyas datos personales." data-en="When you request a suggestion, TypeSafe analyzes this description. Please leave out personal details.">When you request a suggestion, TypeSafe analyzes this description. Please leave out personal details.</small>
+        <button type="button" class="chat-chip" id="chat-project-analyze" onclick="chatAnalyzeProject()" data-es="Sugerir servicio" data-en="Suggest a service">Suggest a service</button>
+        <p id="chat-project-status" role="status" aria-live="polite"></p>
+        <div id="chat-project-suggestion" style="display:none">
+          <button type="button" class="chat-chip" id="chat-project-confirm" onclick="chatConfirmSuggestion()" data-es="Confirmar servicio" data-en="Confirm service">Confirm service</button>
+          <button type="button" class="chat-chip" onclick="chatDismissSuggestion()" data-es="Elegir otro" data-en="Choose another">Choose another</button>
+        </div>
+      </div>
+
       <!-- Service chips -->
       <div class="chat-chips-wrap" id="chat-service-chips" style="display:none">
         {SERVICES.map((s) => (
@@ -95,6 +107,77 @@ const timeKeys = ["time_1", "time_2", "time_3", "time_4"];
   let chatStep = "idle"; 
   let chatData = {};
   let previousFocus = null;
+  let suggestionController = null;
+  let suggestionVersion = 0;
+  let suggestedService = null;
+  let projectStatus = { key: '', service: '' };
+  function renderProjectStatus() {
+    const el = document.getElementById('chat-project-status');
+    if (el) el.textContent = projectStatus.key ? tt(projectStatus.key, { service: projectStatus.service }) : '';
+  }
+  function setProjectStatus(key, service = '') {
+    projectStatus = { key, service };
+    renderProjectStatus();
+  }
+  function cancelSuggestion() {
+    suggestionVersion++;
+    suggestionController?.abort();
+    suggestionController = null;
+    suggestedService = null;
+    const button = document.getElementById('chat-project-analyze');
+    if (button) button.disabled = false;
+    const panel = document.getElementById('chat-project-suggestion');
+    if (panel) panel.style.display = 'none';
+  }
+  window.chatDismissSuggestion = function() {
+    cancelSuggestion();
+    setProjectStatus('chat_project_manual');
+  };
+  window.chatConfirmSuggestion = function() {
+    if (chatStep === 'service' && suggestedService) window.chatPickService(suggestedService);
+  };
+  window.chatAnalyzeProject = async function() {
+    if (chatStep !== 'service' || suggestionController) return;
+    const field = document.getElementById('chat-project-description');
+    const description = field?.value.trim() || '';
+    if (description.length < 10 || description.length > 1000) {
+      setProjectStatus('chat_project_invalid');
+      field?.focus();
+      return;
+    }
+    cancelSuggestion();
+    const version = suggestionVersion;
+    const controller = new AbortController();
+    suggestionController = controller;
+    document.getElementById('chat-project-analyze').disabled = true;
+    setProjectStatus('chat_project_loading');
+    chatData.description = description;
+    const timeout = setTimeout(() => controller.abort(), 6000);
+    try {
+      const response = await fetch('/api/suggest-service', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ description }), signal: controller.signal,
+      });
+      if (!response.ok) throw new Error('unavailable');
+      const result = await response.json();
+      if (version !== suggestionVersion || chatStep !== 'service') return;
+      // Only existing service buttons can become suggestions. Never render provider text.
+      const button = [...document.querySelectorAll('[data-key]')].find(el => el.dataset.key === result.service);
+      if (!button) { setProjectStatus('chat_project_unclear'); return; }
+      suggestedService = result.service;
+      const label = button.querySelector('.chip-label');
+      setProjectStatus('chat_project_suggestion', chatLang === 'en' ? label.dataset.en : label.dataset.es);
+      document.getElementById('chat-project-suggestion').style.display = 'flex';
+    } catch {
+      if (version === suggestionVersion && chatStep === 'service') setProjectStatus('chat_project_unavailable');
+    } finally {
+      clearTimeout(timeout);
+      if (version === suggestionVersion) {
+        suggestionController = null;
+        document.getElementById('chat-project-analyze').disabled = false;
+      }
+    }
+  };
   const pendingTimers = new Set();
   function schedule(callback, delay) {
     const timer = setTimeout(() => { pendingTimers.delete(timer); callback(); }, delay);
@@ -153,10 +236,14 @@ const timeKeys = ["time_1", "time_2", "time_3", "time_4"];
   }
 
   function showInput(type) {
-    ["chat-text-input", "chat-service-chips", "chat-city-chips", "chat-budget-chips", "chat-timeline-chips", "chat-done-btns"].forEach(id => {
+    ["chat-project", "chat-text-input", "chat-service-chips", "chat-city-chips", "chat-budget-chips", "chat-timeline-chips", "chat-done-btns"].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.style.display = "none";
     });
+    if (type === 'service') {
+      const project = document.getElementById('chat-project');
+      if (project) project.style.display = 'grid';
+    }
     const map = { text: "chat-text-input", service: "chat-service-chips", city: "chat-city-chips", budget: "chat-budget-chips", timeline: "chat-timeline-chips", done: "chat-done-btns" };
     if (map[type]) {
         const el = document.getElementById(map[type]);
@@ -175,6 +262,10 @@ const timeKeys = ["time_1", "time_2", "time_3", "time_4"];
 
   window.startChat = function() {
     clearTimers();
+    cancelSuggestion();
+    setProjectStatus('');
+    const project = document.getElementById('chat-project-description');
+    if (project) project.value = '';
     chatStep = "loading";
     showInput("none");
     chatData = {};
@@ -190,6 +281,7 @@ const timeKeys = ["time_1", "time_2", "time_3", "time_4"];
 
   window.chatPickService = function(key) {
     if (chatStep !== "service") return;
+    cancelSuggestion();
     showInput("none");
     const btn = document.querySelector(`[data-key="${key}"]`);
     const label = btn?.querySelector(".chip-label");
@@ -305,6 +397,7 @@ const timeKeys = ["time_1", "time_2", "time_3", "time_4"];
     return [
       header, "--------------------------",
       `*${labels.s}:* ${chatData.service}`,
+      ...(chatData.description ? [`*${chatLang === 'en' ? 'Project' : 'Proyecto'}:* ${chatData.description}`] : []),
       `*${labels.a}:* ${chatData.address}`,
       `*${labels.b}:* ${chatData.budget}`,
       `*${labels.t}:* ${chatData.timeline}`,
@@ -339,6 +432,13 @@ const timeKeys = ["time_1", "time_2", "time_3", "time_4"];
 
   window.__updateChatLang = (lang) => {
     chatLang = lang;
+    if (suggestedService) {
+      const label = [...document.querySelectorAll('[data-key]')].find(el => el.dataset.key === suggestedService)?.querySelector('.chip-label');
+      if (label) projectStatus.service = lang === 'en' ? label.dataset.en : label.dataset.es;
+    }
+    renderProjectStatus();
+    const project = document.getElementById('chat-project-description');
+    if (project) project.placeholder = lang === 'en' ? 'e.g. Replace the cabinets in my kitchen' : 'Ej.: cambiar los gabinetes de mi cocina';
     document.querySelectorAll(".chip-label[data-es][data-en]").forEach((el) => {
       el.textContent = lang === "en" ? el.dataset.en : el.dataset.es;
     });
@@ -358,19 +458,34 @@ const timeKeys = ["time_1", "time_2", "time_3", "time_4"];
     if (!overlay?.classList.contains('open')) return;
     if (event.key === 'Escape') window.closeChat();
     if (event.key === 'Tab') {
-      const items = [...overlay.querySelectorAll('a, button, input')].filter(el => el.getClientRects().length && !el.disabled);
+      const items = [...overlay.querySelectorAll('a, button, input, textarea')].filter(el => el.getClientRects().length && !el.disabled);
       const first = items[0], last = items[items.length - 1];
       if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
       else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
     }
   });
   document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById('chat-project-description')?.addEventListener('input', () => {
+      cancelSuggestion();
+      delete chatData.description;
+      setProjectStatus('');
+    });
     document.getElementById("chat-text-field")?.addEventListener("input", (e) => e.target.setCustomValidity(''));
     document.getElementById("chat-text-field")?.addEventListener("keydown", (e) => { if (e.key === "Enter") chatSendText(); });
   });
 </script>
 
 <style>
+  .chat-project { gap: 8px; margin-bottom: 12px; width: 100%; }
+  .chat-project label { font-size: 13px; color: #f5f5f7; }
+  .chat-project textarea { width: 100%; padding: 10px; min-height: 64px; resize: vertical; border: 1px solid #666; border-radius: 10px; background: #18181b; color: #fff; font: inherit; font-size: 14px; }
+  .chat-project small { color: #b6b6bd; font-size: 11px; line-height: 1.4; }
+  .chat-project p { margin: 0; font-size: 13px; color: #e6e6e9; }
+  .chat-project .chat-chip { justify-content: center; }
+  #chat-project-suggestion { gap: 8px; flex-wrap: wrap; }
+  #chat-project-analyze:disabled { opacity: 0.6; cursor: wait; }
+  .chat-footer { max-height: 65%; overflow-y: auto; flex-shrink: 0; }
+
   .chat-overlay { position: fixed; inset: 0; z-index: 1100; background: rgba(0, 0, 0, 0.7); display: flex; align-items: flex-end; justify-content: flex-end; padding: 24px; visibility: hidden; opacity: 0; pointer-events: none; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
   .chat-overlay.open { visibility: visible; opacity: 1; pointer-events: all; }
   .chat-modal { width: 100%; max-width: 420px; height: min(650px, calc(100dvh - 48px)); background: #0F0F10; border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 40px 80px rgba(0,0,0,0.6); transform: translateY(40px) scale(0.95); transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
